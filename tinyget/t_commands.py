@@ -1,0 +1,3 @@
+
+class TCommand:
+    pass
