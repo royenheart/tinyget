@@ -1,0 +1,2 @@
+rapidfuzz
+python3-apt
