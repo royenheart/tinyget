@@ -24,7 +24,8 @@ def convert_package_info(version: _Version) -> PackageInfo:
 
 
 def convert_package(pkg: _Package) -> Package:
-    if installed_pkg_version := pkg.installed:
+    if pkg.installed is not None:
+        installed_pkg_version = pkg.installed
         installed = convert_package_info(installed_pkg_version)
     else:
         installed = None
@@ -99,4 +100,5 @@ class APT(PackageManagerBase):
 if __name__ == "__main__":
     apt = APT()
     package = apt.get_package("curl")
-    apt.install(package)
+    print(package)
+    import IPython; IPython.embed()
