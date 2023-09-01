@@ -47,3 +47,13 @@ if __name__ == "__main__":
 ```
 
 这个示例中，我们首先加载了 `apt` 和 `dnf`，然后获取了一个名为 "curl" 的软件包的信息并打印出来。然后，我们通过 `dnf` 查找了包含 "vim" 字样的所有软件包，并卸载了其中的第一个。
+
+## 安装
+```bash
+pip3 install .
+```
+
+在 centos 系统中，python3-dnf 的功能由系统包提供，需要由如下指令安装，并且是必须在裸机环境下安装，不能使用 conda, virtualenv 等虚拟环境，否则会出现依赖问题。
+```bash
+dnf install python3-dnf
+```

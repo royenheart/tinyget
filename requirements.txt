@@ -1,3 +1,4 @@
 rapidfuzz
-python3-apt
 requests
+
+python3-apt
