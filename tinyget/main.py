@@ -2,6 +2,7 @@
 from .wrappers import PackageManager
 import sys
 
-def main():
+
+def cli():
     print(sys.argv)
     print(PackageManager)

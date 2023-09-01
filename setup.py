@@ -41,5 +41,5 @@ setup(
     author_email="zhaggbl@outlook.com",
     description="A tiny package manager for Linux",
     license="MIT",
-    entry_points={"console_scripts": ["tinyget=tinyget.tinyget:main"]},
+    entry_points={"console_scripts": ["tinyget=tinyget.main:cli"]},
 )
