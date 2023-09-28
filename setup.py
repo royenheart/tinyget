@@ -4,13 +4,22 @@ import os
 
 supported_package_managers = ["apt", "dnf"]
 
-common_required_packages = [
-    "rapidfuzz",
-    "requests",
-]
+common_required_packages = ["requests", "click"]
 
 
 def get_os_package_manager(possible_package_manager_names: List[str]):
+    """
+    Get the operating system package manager from a list of possible package manager names.
+
+    Args:
+        possible_package_manager_names (List[str]): A list of possible package manager names.
+
+    Returns:
+        str: The name of the operating system package manager.
+
+    Raises:
+        Exception: If no supported package manager is found in the PATH.
+    """
     paths = os.environ["PATH"].split(os.pathsep)
     for bin_path in paths:
         for package_manager_name in possible_package_manager_names:
@@ -22,13 +31,13 @@ def get_os_package_manager(possible_package_manager_names: List[str]):
 current_package_manager = get_os_package_manager(supported_package_managers)
 
 if current_package_manager == "apt":
-    specific_required_packages = ["python3-apt"]
+    specific_required_packages = []
 elif current_package_manager == "dnf":
     specific_required_packages = []
-    # specific_required_packages = ["python3-dnf"]
-    pass
-else:
+elif current_package_manager == "pacman":
     specific_required_packages = []
+else:
+    raise Exception("No supported package manager found in PATH")
 
 required_packages = common_required_packages + specific_required_packages
 

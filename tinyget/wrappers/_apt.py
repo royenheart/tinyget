@@ -1,104 +1,135 @@
-from apt.cache import Cache as _Cache
-from apt.package import Version as _Version
-from apt.package import Package as _Package
-import apt_pkg
+import re
 from .pkg_manager import PackageManagerBase
-from ..package import ManagerType, Package, PackageInfo
-from ..common import match_str_from_list
-from ..common.exceptions import PackageNotFound, PackageNotInstalled
-
-from typing import Union
-
-
-def get_architecture() -> str:
-    return apt_pkg.get_architectures()[0]
-
-
-def convert_package_info(version: _Version) -> PackageInfo:
-    return PackageInfo(
-        architecture=version.architecture,
-        description=version.raw_description,
-        is_installed=version.is_installed,
-        version=version.version,
-    )
-
-
-def convert_package(pkg: _Package) -> Package:
-    if pkg.installed is not None:
-        installed_pkg_version = pkg.installed
-        installed = convert_package_info(installed_pkg_version)
-    else:
-        installed = None
-
-    available = []
-    for version in pkg.versions:
-        available.append(convert_package_info(version))
-
-    candidate = convert_package_info(pkg.candidate)
-    upgradable = pkg.is_upgradable
-    return Package(
-        manager=ManagerType.apt,
-        installed=installed,
-        is_installed=pkg.is_installed,
-        is_auto_installed=pkg.is_auto_installed,
-        name=pkg.name,
-        available=available,
-        upgradable=upgradable,
-        candidate=candidate,
-    )
+from ..interact import Process
+from ..package import Package, ManagerType
+from typing import Union, List
 
 
 class APT(PackageManagerBase):
     def __init__(self):
-        self.cache = _Cache()
-        self.architecture = get_architecture()
+        pass
 
-    def list(self):
-        installed_packages = []
-        for pkg in self.cache:
-            if pkg.is_installed:
-                installed_packages.append(self.get_package(pkg.name))
+    def list_packages(
+        self, only_installed: bool = False, only_upgradable: bool = False
+    ):
+        """
+        Returns a list of packages based on the specified criteria.
 
-        return installed_packages
+        Args:
+            only_installed (bool, optional): If True, only installed packages will be returned. Defaults to False.
+            only_upgradable (bool, optional): If True, only upgradable packages will be returned. Defaults to False.
 
-    def update(self):
-        self.cache.update()
-        self.cache.open()
+        Returns:
+            List[Package]: A list of Package objects representing the packages that match the specified criteria.
+        """
+        args = ["apt", "list", "-v"]
+        p = Process(args)
+        stdout, stderr = p.recv_til_end()
+        content = stdout.decode()
 
-    def upgrade(self):
-        self.cache.upgrade()
-        self.cache.open()
+        blocks = content.split("\n\n")
 
-    def search(self, keyword, limit=10):
-        package_name_list = self.cache.keys()
-        return match_str_from_list(keyword, package_name_list, limit)
+        package_name_regex = r"(?P<package_name>.+)"
+        repo_regex = r"(?P<repo>.+)"
+        version_regex = r"(?P<version>.+)"
+        architecture_regex = r"(?P<architecture>.+)"
+        install_status_regex = r"(?P<install_status>.+)"
+        description_regex = r"(?P<description>.+)"
+        installed_pattern = f"^{package_name_regex}/{repo_regex}\s{version_regex}\s{architecture_regex}\s\[{install_status_regex}\]\n  {description_regex}$"
+        uninstalled_pattern = f"^{package_name_regex}/{repo_regex}\s{version_regex}\s{architecture_regex}\n  {description_regex}$"
+        installed_regex = re.compile(installed_pattern, re.MULTILINE)
+        uninstalled_regex = re.compile(uninstalled_pattern, re.MULTILINE)
 
-    def get_package(self, package_name: str) -> Package:
-        if package_name not in self.cache:
-            raise PackageNotFound(package_name)
-        return convert_package(self.cache[package_name])
+        packages = []
 
-    def install(self, package: Package):
-        package_name = package.name
+        for block in blocks:
+            match = installed_regex.search(block)
+            if match:
+                installed_status = match.group("install_status").split(",")
+                installed = False
+                automatically_installed = False
+                upgradable = False
+                available_version = None
+                for status in installed_status:
+                    if "installed" in status:
+                        installed = True
+                    if "auto" in status:
+                        automatically_installed = True
+                    if "upgradable" in status:
+                        upgradable = True
+                        installed = True
+                        available_version = status[: -len("upgradable from: ")]
+                package = Package(
+                    package_type=ManagerType.apt,
+                    package_name=match.group("package_name"),
+                    architecture=match.group("architecture"),
+                    description=match.group("description"),
+                    version=match.group("version"),
+                    installed=installed,
+                    automatically_installed=automatically_installed,
+                    upgradable=upgradable,
+                    available_version=available_version,
+                    remain={"repo": match.group("repo").split(",")},
+                )
+                packages.append(package)
+                continue
 
-        if package_name not in self.cache:
-            raise PackageNotFound(package_name)
+            match = uninstalled_regex.search(block)
+            if match:
+                package = Package(
+                    package_type=ManagerType.apt,
+                    package_name=match.group("package_name"),
+                    architecture=match.group("architecture"),
+                    description=match.group("description"),
+                    version=match.group("version"),
+                    installed=False,
+                    automatically_installed=False,
+                    upgradable=False,
+                    available_version=None,
+                    remain={"repo": match.group("repo").split(",")},
+                )
+                packages.append(package)
+                continue
+        if only_upgradable:
+            packages = [package for package in packages if package.upgradable]
+        if only_installed:
+            packages = [package for package in packages if package.installed]
+        return packages
 
-        pkg = self.cache[package_name]
-        pkg.mark_install()
-        # commit
-        self.cache.commit()
+    def install(self, package: Union[List[str], str]):
+        """
+        Install one or more packages.
 
-    def uninstall(self, package: Package):
-        if not package.is_installed:
-            raise PackageNotInstalled(package.name)
-        pkg = self.cache[package.name]
-        pkg.mark_delete()
-        self.cache.commit()
+        Args:
+            package (Union[List[str], str]): The package or list of packages to install.
+
+        Returns:
+            None
+        """
+        if isinstance(package, str):
+            package_list = [package]
+        else:
+            package_list = package
+
+        args = ["apt", "install", "-y", *package_list]
 
 
 if __name__ == "__main__":
-    apt = APT()
-    package = apt.get_package("curl")
-    print(package)
-    import IPython; IPython.embed()
+    pass
+
+    # upgradable = 0
+    # installed = 0
+    # auto = 0
+    # total = 0
+    # for package in packages:
+    #     total += 1
+    #     if package.installed:
+    #         installed += 1
+    #     if package.automatically_installed:
+    #         auto += 1
+    #     if package.upgradable:
+    #         upgradable += 1
+
+    # print(
+    #     f"total: {total}, installed: {installed}, auto: {auto}, upgradable: {upgradable}"
+    # )

@@ -1,33 +1,25 @@
-from abc import ABCMeta, abstractclassmethod
 from typing import List, Union
 from ..package import Package
 
 
-class PackageManagerBase(metaclass=ABCMeta):
-    @abstractclassmethod
+class PackageManagerBase:
     def list(self) -> List[Package]:
-        pass
+        raise NotImplementedError
 
-    @abstractclassmethod
     def update(self):
-        pass
+        raise NotImplementedError
 
-    @abstractclassmethod
     def install(self, package: Package):
-        pass
+        raise NotImplementedError
 
-    @abstractclassmethod
     def uninstall(self, package: Package):
-        pass
+        raise NotImplementedError
 
-    @abstractclassmethod
     def upgrade(self):
-        pass
+        raise NotImplementedError
 
-    @abstractclassmethod
     def search(self, keyword, limit=10) -> List[Package]:
-        pass
+        raise NotImplementedError
 
-    @abstractclassmethod
     def get_package(self, package_name: str) -> Package:
-        pass
+        raise NotImplementedError
