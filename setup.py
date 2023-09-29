@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 from typing import List
 import os
 
-supported_package_managers = ["apt", "dnf"]
+supported_package_managers = ["apt", "dnf", "pacman"]
 
 common_required_packages = ["requests", "click", "dataclasses"]
 
@@ -23,6 +23,8 @@ def get_os_package_manager(possible_package_manager_names: List[str]):
     paths = os.environ["PATH"].split(os.pathsep)
     for bin_path in paths:
         for package_manager_name in possible_package_manager_names:
+            if not os.path.exists(bin_path):
+                continue
             if package_manager_name in os.listdir(bin_path):
                 return package_manager_name
     raise Exception("No supported package manager found in PATH")
