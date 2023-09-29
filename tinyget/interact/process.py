@@ -17,7 +17,7 @@ def spawn(args: Union[List[str], str], envp: dict = {}):
     # If args is a string, assume it is a shell command
     # If args is a list, assume it is a list of arguments
     orig_envp = dict(os.environ)
-    for k, v in envp:
+    for k, v in envp.items():
         orig_envp[k] = v
     return subprocess.Popen(
         args=args,

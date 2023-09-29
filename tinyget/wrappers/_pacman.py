@@ -120,57 +120,62 @@ def get_upgradable() -> Dict[str, str]:
     return upgradable
 
 
+def get_all_packages() -> List[Package]:
+    installed_packages = get_all_installed_package_name()
+    packages = get_all_package_name()
+    installed_info = get_installed_info(installed_packages)
+    package_info = get_available_info(packages)
+
+    installed_info_dict = {info["name"]: info for info in installed_info}
+    package_info_dict = {info["name"]: info for info in package_info}
+
+    upgradable_dict = get_upgradable()
+
+    packages = []
+    for name, info in package_info_dict.items():
+        if name in installed_info_dict:
+            installed = True
+            automatically_installed = (
+                "Installed as a dependency" in installed_info_dict[name]["reason"]
+            )
+        else:
+            installed = False
+            automatically_installed = False
+
+        if name in upgradable_dict:
+            upgradable = True
+            available_version = upgradable_dict[name]
+        else:
+            upgradable = False
+            available_version = None
+
+        remain = {"repo": [info["repo"]]}
+        package = Package(
+            package_type=ManagerType.pacman,
+            package_name=info["name"],
+            architecture=info["architecture"],
+            description=info["description"],
+            version=info["version"],
+            installed=installed,
+            automatically_installed=automatically_installed,
+            upgradable=upgradable,
+            available_version=available_version,
+            remain=remain,
+        )
+        packages.append(package)
+    return packages
+
+
 class PACMAN(PackageManagerBase):
     def __init__(self):
         pass
 
     def list_packages(self, only_installed, only_upgradable) -> List[Package]:
-        installed_packages = get_all_installed_package_name()
-        packages = get_all_package_name()
-        installed_info = get_installed_info(installed_packages)
-        package_info = get_available_info(packages)
-
-        installed_info_dict = {info["name"]: info for info in installed_info}
-        package_info_dict = {info["name"]: info for info in package_info}
-
-        upgradable_dict = get_upgradable()
-
-        packages = []
-        for name, info in package_info_dict.items():
-            if name in installed_info_dict:
-                installed = True
-                automatically_installed = (
-                    "Installed as a dependency" in installed_info_dict[name]["reason"]
-                )
-            else:
-                installed = False
-                automatically_installed = False
-
-            if name in upgradable_dict:
-                upgradable = True
-                available_version = upgradable_dict[name]
-            else:
-                upgradable = False
-                available_version = None
-            
-            remain = {"repo": [info["repo"]]}
-            package = Package(
-                package_type=ManagerType.pacman,
-                package_name=info["name"],
-                architecture=info["architecture"],
-                description=info["description"],
-                version=info["version"],
-                installed=installed,
-                automatically_installed=automatically_installed,
-                upgradable=upgradable,
-                available_version=available_version,
-                remain=remain,
-            )
-            packages.append(package)
-        
+        packages = get_all_packages()
+        # Process filter
         if only_installed:
             packages = [package for package in packages if package.installed]
-        
+
         if only_upgradable:
             packages = [package for package in packages if package.upgradable]
 
