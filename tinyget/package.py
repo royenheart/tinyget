@@ -27,4 +27,7 @@ class Package:
         result += f" version: {self.version}\n"
         result += f" installed: {self.installed}\n"
         result += f" automatically_installed: {self.automatically_installed}\n"
+        result += f" upgradable: {self.upgradable}\n"
+        result += f" available_version: {self.available_version}\n"
+        result += f" remain: {self.remain}\n"
         return result

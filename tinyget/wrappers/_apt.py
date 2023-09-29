@@ -24,8 +24,7 @@ class APT(PackageManagerBase):
         """
         args = ["apt", "list", "-v"]
         p = Process(args)
-        stdout, stderr = p.recv_til_end()
-        content = stdout.decode()
+        content, stderr = p.recv_til_end()
 
         blocks = content.split("\n\n")
 

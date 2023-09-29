@@ -25,7 +25,7 @@ class Process(object):
 
     def recv_til_end(self, timeout: int = None):
         stdout, stderr = self.p.communicate(input=None, timeout=timeout)
-        return stdout, stderr
+        return stdout.decode(), stderr.decode()
 
 
 if __name__ == "__main__":

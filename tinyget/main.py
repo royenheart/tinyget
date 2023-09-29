@@ -10,9 +10,12 @@ def cli():
 
 
 @cli.command()
-@click.option("--only-installed", is_flag=True, default=True)
-def list(only_installed: bool):
+@click.option("--installed", is_flag=True, default=False)
+@click.option("--upgradable", is_flag=True, default=False)
+def list(installed: bool, upgradable: bool):
     package_manager = PackageManager()
-    packages = package_manager.list_packages(only_installed=only_installed)
+    packages = package_manager.list_packages(
+        only_installed=installed, only_upgradable=upgradable
+    )
     for package in packages:
         click.echo(package)

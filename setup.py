@@ -4,7 +4,7 @@ import os
 
 supported_package_managers = ["apt", "dnf"]
 
-common_required_packages = ["requests", "click"]
+common_required_packages = ["requests", "click", "dataclasses"]
 
 
 def get_os_package_manager(possible_package_manager_names: List[str]):
