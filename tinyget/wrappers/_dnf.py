@@ -97,6 +97,17 @@ def repoquery(flags: Union[List[str], str] = []):
 
 
 def check_update():
+    """
+    Check for available updates using the 'dnf check-update' command.
+
+    Returns:
+        A list of dictionaries containing information about the available updates.
+        Each dictionary has the following keys:
+        - name: the name of the package
+        - version: the new version of the package
+        - arch: the architecture of the package
+        - repo: the repository where the package is located
+    """
     args = ["dnf", "check-update"]
     stdout, stderr = execute_command(args)
     lines = stdout.split("\n")
@@ -120,6 +131,12 @@ def check_update():
 
 
 def get_all_packages() -> List[Package]:
+    """
+    Retrieves information about all packages.
+
+    Returns:
+        List[Package]: A list of Package objects representing the packages.
+    """
     package_info_list = repoquery()
     package_info_dict = {}
     for p in package_info_list:
@@ -172,6 +189,16 @@ class DNF(PackageManagerBase):
         pass
 
     def list_packages(self, only_installed: bool, only_upgradable: bool):
+        """
+        Retrieves a list of packages based on the specified filters.
+
+        Args:
+            only_installed (bool): If True, only return installed packages.
+            only_upgradable (bool): If True, only return upgradable packages.
+
+        Returns:
+            List[Package]: A list of packages that match the specified filters.
+        """
         package_list = get_all_packages()
         # Process filter
         if only_installed:
@@ -181,6 +208,11 @@ class DNF(PackageManagerBase):
         return package_list
 
     def update(self):
+        """
+        Updates the system by checking for and applying available updates.
+
+        :return: The output of the command executed to update the system.
+        """
         args = ["dnf", "check-update", "-y"]
         return execute_command(args)
 

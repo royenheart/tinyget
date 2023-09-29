@@ -7,6 +7,26 @@ import subprocess
 
 
 def get_installed_info(package_name: Union[List[str], str]) -> List[dict]:
+    """
+    Retrieves information about the installed packages with the given package name(s).
+
+    Parameters:
+        package_name (Union[List[str], str]): The name(s) of the package(s) to retrieve information for.
+            It can either be a single package name as a string or a list of package names.
+
+    Returns:
+        List[dict]: A list of dictionaries containing information about each installed package. Each dictionary
+            contains the following keys:
+            - 'name': The name of the package.
+            - 'version': The version of the package.
+            - 'description': A description of the package.
+            - 'architecture': The architecture of the package.
+            - 'reason': The reason for the package installation.
+
+    Raises:
+        ValueError: If the package_name is neither a string nor a list of strings.
+        Exception: If the package is not found in the local database.
+    """
     if isinstance(package_name, str):
         package_name_list = [package_name]
     elif isinstance(package_name, list):
@@ -43,6 +63,25 @@ def get_installed_info(package_name: Union[List[str], str]) -> List[dict]:
 
 
 def get_available_info(package_name: Union[List[str], str]) -> List[dict]:
+    """
+    Retrieves available information for a given package or list of packages.
+
+    Args:
+        package_name (Union[List[str], str]): The name of the package or a list of package names.
+
+    Returns:
+        List[dict]: A list of dictionaries containing the available information for each package. Each dictionary contains the following keys:
+            - name (str): The name of the package.
+            - version (str): The version of the package.
+            - description (str): A description of the package.
+            - architecture (str): The architecture of the package.
+            - replaces (str): The package that this package replaces.
+            - repo (str): The repository where the package is located.
+
+    Raises:
+        ValueError: If `package_name` is neither a string nor a list of strings.
+        Exception: If the package is not found in the source.
+    """
     if isinstance(package_name, str):
         package_name_list = [package_name]
     elif isinstance(package_name, list):
@@ -87,6 +126,12 @@ def get_available_info(package_name: Union[List[str], str]) -> List[dict]:
 
 
 def get_all_package_name() -> List[str]:
+    """
+    Retrieves a list of all package names.
+
+    Returns:
+        A list of strings containing the names of all packages.
+    """
     args = ["pacman", "-Ssq"]
     stdout, stderr = execute_command(args)
     packages = [
@@ -96,6 +141,12 @@ def get_all_package_name() -> List[str]:
 
 
 def get_all_installed_package_name() -> List[str]:
+    """
+    Get the names of all installed packages.
+
+    :return: A list of strings representing the names of installed packages.
+    :rtype: List[str]
+    """
     args = ["pacman", "-Qq"]
     stdout, stderr = execute_command(args)
     packages = [
@@ -105,6 +156,12 @@ def get_all_installed_package_name() -> List[str]:
 
 
 def get_upgradable() -> Dict[str, str]:
+    """
+    Retrieves a dictionary of upgradable packages and their available versions.
+
+    Returns:
+        A dictionary where the keys are the package names and the values are the available versions.
+    """
     args = ["pacman", "-Qu"]
     stdout, stderr = execute_command(args)
     regex = re.compile(
@@ -121,6 +178,13 @@ def get_upgradable() -> Dict[str, str]:
 
 
 def get_all_packages() -> List[Package]:
+    """
+    Retrieves information about all packages.
+
+    Returns:
+        List[Package]: A list of Package objects representing the information
+        about each package.
+    """
     installed_packages = get_all_installed_package_name()
     packages = get_all_package_name()
     installed_info = get_installed_info(installed_packages)
@@ -171,6 +235,16 @@ class PACMAN(PackageManagerBase):
         pass
 
     def list_packages(self, only_installed, only_upgradable) -> List[Package]:
+        """
+        Retrieve a list of packages based on filter criteria.
+
+        Args:
+            only_installed (bool): If True, only return installed packages.
+            only_upgradable (bool): If True, only return upgradable packages.
+
+        Returns:
+            List[Package]: A list of packages that match the filter criteria.
+        """
         packages = get_all_packages()
         # Process filter
         if only_installed:
