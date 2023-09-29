@@ -1,6 +1,6 @@
 import re
 from .pkg_manager import PackageManagerBase
-from ..interact import execute_command
+from ..interact import execute_command, CommandExecutionError
 from ..package import Package, ManagerType
 from typing import Union, List, Dict
 import subprocess
@@ -163,7 +163,16 @@ def get_upgradable() -> Dict[str, str]:
         A dictionary where the keys are the package names and the values are the available versions.
     """
     args = ["pacman", "-Qu"]
-    stdout, stderr = execute_command(args)
+    try:
+        stdout, stderr = execute_command(args)
+    except CommandExecutionError as e:
+        # If there is no upgradable packages, pacman returns nonzero, which is not an error
+        # So we need to check stderr
+        if e.stderr == "":
+            stdout = e.stdout
+            stderr = e.stderr
+        else:
+            raise
     regex = re.compile(
         r"^(?P<package_name>.+)\s(?P<version>.+)\s->\s(?P<available_version>.+)$"
     )
@@ -262,6 +271,15 @@ class PACMAN(PackageManagerBase):
         :return: The result of executing the command.
         """
         args = ["pacman", "-Sy", "--noconfirm"]
+        return execute_command(args)
+
+    def upgrade(self):
+        """
+        Upgrade the system by executing the command "pacman -Syu --noconfirm".
+
+        :return: The result of executing the command.
+        """
+        args = ["pacman", "-Syu", "--noconfirm"]
         return execute_command(args)
 
 

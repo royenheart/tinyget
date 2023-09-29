@@ -135,6 +135,19 @@ class APT(PackageManagerBase):
         args = ["apt", "update", "-y"]
         return execute_command(args)
 
+    def upgrade(self):
+        """
+        Upgrade the system by running the 'apt upgrade' command with the '-y' flag.
+
+        Parameters:
+            None
+
+        Returns:
+            The output of the 'execute_command' function.
+        """
+        args = ["apt", "upgrade", "-y"]
+        return execute_command(args)
+
 
 if __name__ == "__main__":
     pass

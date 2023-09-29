@@ -1,1 +1,1 @@
-from .process import execute_command
+from .process import execute_command, CommandExecutionError

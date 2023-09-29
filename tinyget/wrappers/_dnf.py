@@ -216,6 +216,15 @@ class DNF(PackageManagerBase):
         args = ["dnf", "check-update", "-y"]
         return execute_command(args)
 
+    def upgrade(self):
+        """
+        Upgrade the system by running the `dnf upgrade` command with the specified arguments.
+
+        :return: The output of the `execute_command` function.
+        """
+        args = ["dnf", "upgrade", "--refresh", "-y"]
+        return execute_command(args)
+
 
 if __name__ == "__main__":
     dnf = DNF()
