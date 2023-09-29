@@ -33,7 +33,7 @@ def get_installed_info(package_name: Union[List[str], str]) -> List[dict]:
         package_name_list = package_name
     else:
         raise ValueError("package_name must be a string or a list of strings")
-    args = ["pacman", "-Qi", *package_name_list]
+    args = ["pacman", "-Qi", "--noconfirm", *package_name_list]
     stdout, stderr = execute_command(args)
     if "was not found" in stderr and "error" in stderr:
         raise Exception(f"Package {package_name} not found in local db")
@@ -254,6 +254,15 @@ class PACMAN(PackageManagerBase):
             packages = [package for package in packages if package.upgradable]
 
         return packages
+
+    def update(self):
+        """
+        Updates the object with the latest information by executing the command "pacman -Sy --noconfirm" and returns the result.
+
+        :return: The result of executing the command.
+        """
+        args = ["pacman", "-Sy", "--noconfirm"]
+        return execute_command(args)
 
 
 if __name__ == "__main__":
