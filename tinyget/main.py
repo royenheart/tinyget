@@ -19,3 +19,9 @@ def list(installed: bool, upgradable: bool):
     )
     for package in packages:
         click.echo(package)
+
+
+@cli.command()
+def update():
+    package_manager = PackageManager()
+    package_manager.update()

@@ -1,6 +1,6 @@
 import re
 from .pkg_manager import PackageManagerBase
-from ..interact import Process
+from ..interact import execute_command
 from ..package import Package, ManagerType
 from typing import Union, List
 
@@ -81,8 +81,7 @@ class DNF(PackageManagerBase):
         format_string += "$$$"
         args = ["dnf", "repoquery", *flags, "--queryformat", format_string]
 
-        p = Process(args)
-        stdout, stderr = p.recv_til_end()
+        stdout, stderr = execute_command(args)
         regex = re.compile(r"\^\^\^(?P<line>.+)\$\$\$")
         matches = regex.finditer(stdout)
         lines = []
@@ -113,8 +112,7 @@ class DNF(PackageManagerBase):
                   - repo (str): The repository of the package.
         """
         args = ["dnf", "check-update"]
-        p = Process(args)
-        stdout, stderr = p.recv_til_end()
+        stdout, stderr = execute_command(args)
         lines = stdout.split("\n")
         upgradable = []
         for line in lines:
@@ -197,6 +195,10 @@ class DNF(PackageManagerBase):
         if only_upgradable:
             package_list = [p for p in package_list if p.upgradable]
         return package_list
+
+    def update(self):
+        args = ["dnf", "check-update", "-y"]
+        return execute_command(args)
 
 
 if __name__ == "__main__":

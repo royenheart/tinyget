@@ -1,6 +1,6 @@
 import re
 from .pkg_manager import PackageManagerBase
-from ..interact import Process
+from ..interact import execute_command
 from ..package import Package, ManagerType
 from typing import Union, List, Dict
 import subprocess
@@ -14,8 +14,7 @@ def get_installed_info(package_name: Union[List[str], str]) -> List[dict]:
     else:
         raise ValueError("package_name must be a string or a list of strings")
     args = ["pacman", "-Qi", *package_name_list]
-    p = Process(args)
-    stdout, stderr = p.recv_til_end()
+    stdout, stderr = execute_command(args)
     if "was not found" in stderr and "error" in stderr:
         raise Exception(f"Package {package_name} not found in local db")
 
@@ -51,8 +50,7 @@ def get_available_info(package_name: Union[List[str], str]) -> List[dict]:
     else:
         raise ValueError("package_name must be a string or a list of strings")
     args = ["pacman", "-Si", *package_name_list]
-    p = Process(args)
-    stdout, stderr = p.recv_til_end()
+    stdout, stderr = execute_command(args)
     if "was not found" in stderr and "error" in stderr:
         raise Exception(f"Package {package_name} not found in source")
 
@@ -89,8 +87,8 @@ def get_available_info(package_name: Union[List[str], str]) -> List[dict]:
 
 
 def get_all_package_name() -> List[str]:
-    p = Process(["pacman", "-Ssq"])
-    stdout, stderr = p.recv_til_end()
+    args = ["pacman", "-Ssq"]
+    stdout, stderr = execute_command(args)
     packages = [
         package_name for package_name in stdout.split("\n") if package_name != ""
     ]
@@ -98,8 +96,8 @@ def get_all_package_name() -> List[str]:
 
 
 def get_all_installed_package_name() -> List[str]:
-    p = Process(["pacman", "-Qq"])
-    stdout, stderr = p.recv_til_end()
+    args = ["pacman", "-Qq"]
+    stdout, stderr = execute_command(args)
     packages = [
         package_name for package_name in stdout.split("\n") if package_name != ""
     ]
@@ -107,8 +105,8 @@ def get_all_installed_package_name() -> List[str]:
 
 
 def get_upgradable() -> Dict[str, str]:
-    p = Process(["pacman", "-Qu"])
-    stdout, stderr = p.recv_til_end()
+    args = ["pacman", "-Qu"]
+    stdout, stderr = execute_command(args)
     regex = re.compile(
         r"^(?P<package_name>.+)\s(?P<version>.+)\s->\s(?P<available_version>.+)$"
     )

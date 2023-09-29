@@ -1,6 +1,6 @@
 import re
 from .pkg_manager import PackageManagerBase
-from ..interact import Process
+from ..interact import execute_command
 from ..package import Package, ManagerType
 from typing import Union, List
 
@@ -23,8 +23,7 @@ class APT(PackageManagerBase):
             List[Package]: A list of Package objects representing the packages that match the specified criteria.
         """
         args = ["apt", "list", "-v"]
-        p = Process(args)
-        content, stderr = p.recv_til_end()
+        content, stderr = execute_command(args, {"DEBIAN_FRONTEND": "noninteractive"})
 
         blocks = content.split("\n\n")
 
@@ -111,6 +110,10 @@ class APT(PackageManagerBase):
             package_list = package
 
         args = ["apt", "install", "-y", *package_list]
+
+    def update(self):
+        args = ["apt", "update", "-y"]
+        return execute_command(args)
 
 
 if __name__ == "__main__":
