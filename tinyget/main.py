@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 from .wrappers import PackageManager, package_manager_name
 from typing import List
+
+from trogon import tui
 import click
 import sys
 import os
 
 
+@tui(command="ui", help="TinyGet UI")
 @click.group()
 def cli():
     pass
