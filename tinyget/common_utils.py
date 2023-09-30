@@ -1,7 +1,9 @@
 from typing import List, Dict, Union
 import click
+import pwd
 import json
 import os
+from contextlib import contextmanager
 
 from .globals import global_configs
 
@@ -13,6 +15,20 @@ def get_os_package_manager(possible_package_manager_names: List[str]):
             if package_manager_name in os.listdir(bin_path):
                 return package_manager_name
     raise Exception("No supported package manager found in PATH")
+
+
+@contextmanager
+def temp_permissions(username):
+    original_uid = os.geteuid()
+    original_gid = os.getegid()
+    user_info = pwd.getpwnam(username)
+    os.seteuid(user_info.pw_uid)
+    os.setegid(user_info.pw_gid)
+    try:
+        yield user_info.pw_dir
+    finally:
+        os.seteuid(original_uid)
+        os.setegid(original_gid)
 
 
 def default_config_path():

@@ -1,4 +1,0 @@
-rapidfuzz
-requests
-
-python3-apt

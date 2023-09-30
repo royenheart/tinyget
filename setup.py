@@ -4,7 +4,7 @@ import os
 
 supported_package_managers = ["apt", "dnf", "pacman"]
 
-common_required_packages = ["requests", "click", "dataclasses"]
+common_required_packages = ["requests", "click", "dataclasses", "rich", "trogon"]
 
 
 def get_os_package_manager(possible_package_manager_names: List[str]):

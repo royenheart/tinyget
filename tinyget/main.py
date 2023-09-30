@@ -13,7 +13,11 @@ import os
 
 @tui(command="ui", help="TinyGet UI")
 @click.group()
-@click.option("--config-path", default=None, help="Path to configuration file.")
+@click.option(
+    "--config-path",
+    default=None,
+    help="Path to configuration file, default is ~/.tinyget.conf.",
+)
 @click.option("--host", default=None, help="OpenAI host.")
 @click.option("--api-key", default=None, help="OpenAI API key.")
 @click.option("--model", default=None, help="OpenAI model.")
@@ -107,7 +111,7 @@ def uninstall(package_names: List[str]):
     default=1024,
     help="Maximum number of tokens to be generated, default is 1024, can be specified with environment variable OPENAI_MAX_TOKENS, 8192 is openai's max value when using gpt-3.5-turbo",
 )
-def helper_config(host: str, api_key: str, model: str, max_tokens: int):
+def config(host: str, api_key: str, model: str, max_tokens: int):
     if all([v is not None for v in [host, api_key, model, max_tokens]]):
         ai_helper = AIHelper(
             host=host, api_key=api_key, model=model, max_tokens=max_tokens
