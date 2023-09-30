@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field
 from typing import List
 from enum import Enum
-
+from rich.table import Table
+from rich.console import Console
 
 ManagerType = Enum("ManagerType", "apt dnf pacman")
 
@@ -31,3 +32,32 @@ class Package:
         result += f" available_version: {self.available_version}\n"
         result += f" remain: {self.remain}\n"
         return result
+
+
+def show_packages(packages: List[Package]):
+    table = Table(show_header=True, header_style="bold magenta")
+    table.add_column("package_type")
+    table.add_column("package_name")
+    table.add_column("architecture")
+    table.add_column("description")
+    table.add_column("version")
+    table.add_column("installed")
+    table.add_column("automatically_installed")
+    table.add_column("upgradable")
+    table.add_column("available_version")
+    table.add_column("remain")
+    for package in packages:
+        table.add_row(
+            str(package.package_type),
+            str(package.package_name),
+            str(package.architecture),
+            str(package.description),
+            str(package.version),
+            str(package.installed),
+            str(package.automatically_installed),
+            str(package.upgradable),
+            str(package.available_version),
+            str(package.remain),
+        )
+    console = Console()
+    console.print(table)

@@ -30,7 +30,10 @@ def execute_command(args: Union[List[str], str], envp: dict = {}, timeout: int =
                 )
             )
         else:
-            recommendation = ai_helper.fix_command(args, e.stdout, e.stderr)
+            with console.status(
+                "[bold green] AI助手已经激活，正在获取建议", spinner="bouncingBar"
+            ) as status:
+                recommendation = ai_helper.fix_command(args, e.stdout, e.stderr)
             console.print(
                 Panel(
                     recommendation,

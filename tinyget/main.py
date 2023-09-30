@@ -2,6 +2,7 @@
 from .wrappers import PackageManager, package_manager_name
 from .interact import AIHelper, AIHelperHostError, AIHelperKeyError
 from .common_utils import get_configuration, set_configuration
+from .package import show_packages
 from .globals import global_configs
 
 from typing import List

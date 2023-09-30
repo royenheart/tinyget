@@ -9,6 +9,18 @@ from .globals import global_configs
 
 
 def get_os_package_manager(possible_package_manager_names: List[str]):
+    """
+    Returns the first supported package manager found in the system's PATH environment variable.
+
+    Parameters:
+        possible_package_manager_names (List[str]): A list of possible package manager names to search for.
+
+    Returns:
+        str: The name of the first supported package manager found in the system's PATH environment variable.
+
+    Raises:
+        Exception: If no supported package manager is found in the system's PATH environment variable.
+    """
     paths = os.environ["PATH"].split(os.pathsep)
     for bin_path in paths:
         for package_manager_name in possible_package_manager_names:
@@ -62,6 +74,24 @@ def impersonate(username=os.environ.get("SUDO_USER")):
 def get_configuration(
     path: str = None, key: Union[str, List[str]] = None
 ) -> Dict[str, str]:
+    """
+    Retrieves the configuration from a specified path and returns the values
+    corresponding to the given key(s).
+
+    Args:
+        path (str, optional): The path to the configuration file. If not provided,
+            the default configuration path will be used.
+        key (str or list of str, optional): The key(s) to retrieve the values for.
+            If not provided, all configuration values will be returned.
+
+    Returns:
+        dict: A dictionary containing the configuration values. If the path does not
+            exist, an empty dictionary will be returned. If the key is not found, the
+            value will be set to None.
+
+    Raises:
+        None
+    """
     with impersonate() as default_config_path:
         if path is None:
             path = default_config_path
@@ -102,6 +132,16 @@ def get_configuration(
 
 
 def set_configuration(path: str = None, conf: Dict = {}):
+    """
+    Set the configuration by updating the specified path with the given configuration.
+
+    Parameters:
+    - path (str): The path to the configuration file. If not provided, the default configuration path will be used.
+    - conf (Dict): The configuration to update. It is a dictionary where the keys represent the configuration keys and the values represent the new values.
+
+    Returns:
+    None
+    """
     with impersonate() as default_config_path:
         if path is None:
             path = default_config_path
@@ -114,6 +154,17 @@ def set_configuration(path: str = None, conf: Dict = {}):
 
 
 def get_configuration_with_environ(path: str = None, key_environ: Dict[str, str] = {}):
+    """
+    This code defines a function get_configuration_with_environ that retrieves configuration values from multiple sources and returns them as a dictionary. The function takes two parameters: path, which is the path to the configuration file (if not provided, the default configuration file is used), and key_environ, which is a dictionary mapping configuration keys to environment variable names. The function first gets the configuration values from the specified file or the default file. Then, for each key in key_environ, it checks if there is a corresponding environment variable with the given name. If found, the value is added to the result dictionary. If not found, it checks if there is a global configuration value for the key. If found, the value is added to the result dictionary. If neither the environment variable nor the global configuration value is found, the value from the configuration file is added to the result dictionary. Finally, the function returns the resulting dictionary.
+
+    Parameters:
+        path (str): The path to the configuration file. If not provided, the default configuration file will be used.
+        key_environ (Dict[str, str]): A dictionary mapping configuration keys to environment variable names.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing the configuration values. The keys are the configuration keys, and the values are the corresponding values retrieved from the configuration file, environment variables, or global configuration.
+
+    """
     configs = get_configuration(path=path)
     result = {}
     for key, environ_name in key_environ.items():
