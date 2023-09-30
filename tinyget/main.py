@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 from .wrappers import PackageManager, package_manager_name
-from typing import List
+from .interact import AIHelper, AIHelperHostError, AIHelperKeyError
+from .common_utils import get_configuration, set_configuration
 
+from typing import List
 from trogon import tui
 import click
 import sys
@@ -10,8 +12,11 @@ import os
 
 @tui(command="ui", help="TinyGet UI")
 @click.group()
-def cli():
-    pass
+@click.option("--config-path", "-P", default=None, help="Path to configuration file.")
+@click.pass_context
+def cli(ctx, config_path: str):
+    ctx.ensure_object(dict)
+    ctx.obj["config_path"] = config_path
 
 
 @cli.command("list", help="List packages.")
@@ -32,7 +37,8 @@ def cli():
 @click.option(
     "--count", "-C", is_flag=True, default=False, help="Show count of packages."
 )
-def list_packages(installed: bool, upgradable: bool, count: bool):
+@click.pass_context
+def list_packages(ctx, installed: bool, upgradable: bool, count: bool):
     package_manager = PackageManager()
     packages = package_manager.list_packages(
         only_installed=installed, only_upgradable=upgradable
@@ -45,26 +51,92 @@ def list_packages(installed: bool, upgradable: bool, count: bool):
 
 
 @cli.command(help="Update the index of available packages.")
-def update():
+@click.pass_context
+def update(ctx):
     package_manager = PackageManager()
     package_manager.update()
 
 
 @cli.command(help="Upgrade all available packages.")
-def upgrade():
+@click.pass_context
+def upgrade(ctx):
     package_manager = PackageManager()
     package_manager.upgrade()
 
 
 @cli.command(help="Install packages.")
 @click.argument("package_names", nargs=-1, required=True)
-def install(package_names: List[str]):
+@click.pass_context
+def install(ctx, package_names: List[str]):
     package_manager = PackageManager()
     package_manager.install(package_names)
 
 
 @cli.command(help="Uninstall packages.")
 @click.argument("package_names", nargs=-1, required=True)
-def uninstall(package_names: List[str]):
+@click.pass_context
+def uninstall(ctx, package_names: List[str]):
     package_manager = PackageManager()
     package_manager.uninstall(package_names)
+
+
+@cli.command(help="Interactively set up ai_helper for tinyget.")
+@click.option(
+    "--host",
+    "-H",
+    default="https://api.openai.com",
+    help="openai api host, default is https://api.openai.com, can be specified with environment variable OPENAI_API_HOST",
+)
+@click.option(
+    "--api-key",
+    "-K",
+    default=None,
+    help="openai api key, can be specified with environment variable OPENAI_API_KEY",
+)
+@click.option(
+    "--model",
+    "-M",
+    default="gpt-3.5-turbo",
+    help="model to use, can be specified with environment variable OPENAI_MODEL",
+)
+@click.option(
+    "--max-tokens",
+    "-C",
+    default=1024,
+    help="Maximum number of tokens to be generated, default is 1024, can be specified with environment variable OPENAI_MAX_TOKENS, 8192 is openai's max value when using gpt-3.5-turbo",
+)
+@click.pass_context
+def helper_config(ctx, host: str, api_key: str, model: str, max_tokens: int):
+    if all([v is not None for v in [host, api_key, model, max_tokens]]):
+        ai_helper = AIHelper(
+            host=host, api_key=api_key, model=model, max_tokens=max_tokens
+        )
+        config_valid = True
+        try:
+            ai_helper.check_config()
+        except AIHelperHostError as e:
+            click.echo(f"Host error: {e.host}")
+            config_valid = False
+        except AIHelperKeyError as e:
+            click.echo(f"Key error: {e.key}")
+            config_valid = False
+        except Exception:
+            raise
+
+        if config_valid and not ai_helper.model_available():
+            click.echo(f"Model {model} is not available.")
+            config_valid = False
+
+        if not config_valid:
+            click.confirm(
+                "Some configuration is invalid, still want to save?", abort=True
+            )
+        set_configuration(path=ctx.obj["config_path"], conf=ai_helper.config())
+    else:
+        click.confirm(
+            "Not all configuration is specified, still want to save?", abort=True
+        )
+        ai_helper = AIHelper(
+            host=host, api_key=api_key, model=model, max_tokens=max_tokens
+        )
+        set_configuration(path=ctx.obj["config_path"], conf=ai_helper.config())
