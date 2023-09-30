@@ -282,7 +282,35 @@ class PACMAN(PackageManagerBase):
         args = ["pacman", "-Syu", "--noconfirm"]
         return execute_command(args)
 
+    def install(self, packages: List[str]):
+        """
+        Installs the specified packages using the `pacman` package manager.
+        
+        Args:
+            packages (List[str]): A list of package names to be installed.
+        
+        Returns:
+            None
+        """
+        args = ["pacman", "-S", "--noconfirm", *packages]
+        return execute_command(args)
+
+    def uninstall(self, packages: List[str]):
+        """
+        Uninstalls the specified packages.
+
+        Args:
+            packages (List[str]): A list of package names to uninstall.
+
+        Returns:
+            The result of the execute_command function.
+        """
+        args = ["pacman", "-Rns", "--noconfirm", *packages]
+        return execute_command(args)
+
 
 if __name__ == "__main__":
-    upgradable = get_upgradable()
-    print(upgradable)
+    pacman = PACMAN()
+    stdout, stderr = pacman.install(["wget"])
+    print(stdout)
+    print(stderr)

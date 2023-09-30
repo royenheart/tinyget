@@ -225,8 +225,33 @@ class DNF(PackageManagerBase):
         args = ["dnf", "upgrade", "--refresh", "-y"]
         return execute_command(args)
 
+    def install(self, packages: List[str]):
+        """
+        Installs the specified packages using the DNF package manager.
+
+        Parameters:
+            packages (List[str]): A list of package names to install.
+
+        Returns:
+            The return value of the execute_command function.
+        """
+        args = ["dnf", "install", "-y", *packages]
+        return execute_command(args)
+
+    def uninstall(self, packages: List[str]):
+        """
+        Uninstalls a list of packages.
+
+        Parameters:
+            packages (List[str]): A list of package names to be uninstalled.
+
+        Returns:
+            None
+        """
+        args = ["dnf", "remove", "-y", *packages]
+        return execute_command(args)
+
 
 if __name__ == "__main__":
     dnf = DNF()
-    upgradable = dnf.check_update()
-    print(upgradable)
+    stdout, stderr = dnf.install(["wget"])

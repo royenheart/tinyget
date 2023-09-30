@@ -148,6 +148,32 @@ class APT(PackageManagerBase):
         args = ["apt", "upgrade", "-y"]
         return execute_command(args)
 
+    def install(self, packages: List[str]):
+        """
+        Installs the specified packages.
+
+        Args:
+            packages (List[str]): A list of packages to be installed.
+
+        Returns:
+            The result of executing the command to install the packages.
+        """
+        args = ["apt", "install", "-y", *packages]
+        return execute_command(args)
+
+    def uninstall(self, packages: List[str]):
+        """
+        Uninstalls the specified packages.
+
+        Args:
+            packages (List[str]): A list of package names to uninstall.
+
+        Returns:
+            None: This function does not return anything.
+        """
+        args = ["apt", "remove", "-y", *packages]
+        return execute_command(args)
+
 
 if __name__ == "__main__":
     pass

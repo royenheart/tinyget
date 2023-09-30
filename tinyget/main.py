@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from .wrappers import PackageManager, package_manager_name
+from typing import List
 import click
 import sys
 import os
@@ -50,3 +51,17 @@ def update():
 def upgrade():
     package_manager = PackageManager()
     package_manager.upgrade()
+
+
+@cli.command(help="Install packages.")
+@click.argument("package_names", nargs=-1, required=True)
+def install(package_names: List[str]):
+    package_manager = PackageManager()
+    package_manager.install(package_names)
+
+
+@cli.command(help="Uninstall packages.")
+@click.argument("package_names", nargs=-1, required=True)
+def uninstall(package_names: List[str]):
+    package_manager = PackageManager()
+    package_manager.uninstall(package_names)
