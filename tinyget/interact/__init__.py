@@ -8,6 +8,7 @@ from .ai_helper import (
 from typing import Union, List
 from rich.panel import Panel
 from rich.console import Console
+from rich.spinner import Spinner
 import traceback
 import click
 import sys
@@ -25,7 +26,7 @@ def execute_command(args: Union[List[str], str], envp: dict = {}, timeout: int =
             console.print(
                 Panel(
                     "AI助手没有启动，可以通过tinyget config或tinyget ui配置后启动",
-                    border_style="green",
+                    border_style="grey",
                 )
             )
         else:
