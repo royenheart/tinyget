@@ -3,6 +3,8 @@ import click
 import json
 import os
 
+from .globals import global_configs
+
 
 def get_os_package_manager(possible_package_manager_names: List[str]):
     paths = os.environ["PATH"].split(os.pathsep)
@@ -14,7 +16,6 @@ def get_os_package_manager(possible_package_manager_names: List[str]):
 
 
 def default_config_path():
-    # TODO: Add support for sudo
     return os.path.join(os.environ.get("HOME"), ".tinyget.conf")
 
 
@@ -68,6 +69,25 @@ def set_configuration(path: str = None, conf: Dict = {}):
 
     with open(path, "w") as f:
         json.dump(origin_config, f, indent=4)
+
+
+def get_configuration_with_environ(path: str = None, key_environ: Dict[str, str] = {}):
+    configs = get_configuration(path=path)
+    result = {}
+    for key, environ_name in key_environ.items():
+        val = os.environ.get(environ_name)
+        if val is not None:
+            result[key] = val
+            break
+
+        val = global_configs.get(key)
+        if val is not None:
+            result[key] = val
+            break
+
+        result[key] = configs.get(key)
+
+    return result
 
 
 if __name__ == "__main__":

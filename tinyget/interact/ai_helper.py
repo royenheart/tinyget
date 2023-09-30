@@ -1,9 +1,13 @@
 import os
 import sys
 import json
+import click
 import requests
 from typing import List, Dict, Any, Union
 from urllib.parse import urljoin, urlparse
+
+from ..common_utils import get_configuration_with_environ
+from ..globals import global_configs
 
 SYSTEM_PROMPT = """
 你是一个熟练的Linux专家，精通各类发行版中的包管理器，也能熟练运用各类软件包管理器的命令。
@@ -209,6 +213,16 @@ class AIHelper:
         else:
             raise ModelException("Model returned an unexpected response", model, result)
 
+    def ok(self) -> bool:
+        try:
+            self.check_config()
+        except AIHelperHostError:
+            return False
+        except AIHelperKeyError:
+            return False
+
+        return self.model_available()
+
     def ask(self, query: str) -> str:
         """
         Executes a question by generating a completion based on the provided query.
@@ -279,14 +293,32 @@ class AIHelper:
         return answer
 
 
-if __name__ == "__main__":
-    from pprint import pprint
-
-    ai_helper = AIHelper(
-        host="https://api.chatanywhere.com.cn",
-        api_key="sk-TERLP9W4T0RLUxL3mSvnkj9D7n1L6Ta4QLzyZgyXOJG2ImBV",
-        model="gpt-3.5-turbo",
+def try_to_get_ai_helper():
+    configs = get_configuration_with_environ(
+        path=global_configs.get("config_path"),
+        key_environ={
+            "host": "OPENAI_API_HOST",
+            "api_key": "OPENAI_API_KEY",
+            "model": "DEFAULT_MODEL",
+            "max_tokens": "MAX_TOKENS",
+        },
     )
 
-    answer = ai_helper.fix_command("apt install vimm", "package vim not found")
-    print(answer)
+    if not all(val is not None for val in configs.values()):
+        return None
+
+    ai_helper = AIHelper(
+        host=configs["host"],
+        api_key=configs["api_key"],
+        model=configs["model"],
+        max_tokens=configs["max_tokens"],
+    )
+    if ai_helper.ok():
+        return ai_helper
+    else:
+        return None
+
+
+if __name__ == "__main__":
+    ai_helper = try_to_get_ai_helper()
+    print(ai_helper)

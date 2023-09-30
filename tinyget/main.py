@@ -2,6 +2,7 @@
 from .wrappers import PackageManager, package_manager_name
 from .interact import AIHelper, AIHelperHostError, AIHelperKeyError
 from .common_utils import get_configuration, set_configuration
+from .globals import global_configs
 
 from typing import List
 from trogon import tui
@@ -12,11 +13,17 @@ import os
 
 @tui(command="ui", help="TinyGet UI")
 @click.group()
-@click.option("--config-path", "-P", default=None, help="Path to configuration file.")
-@click.pass_context
-def cli(ctx, config_path: str):
-    ctx.ensure_object(dict)
-    ctx.obj["config_path"] = config_path
+@click.option("--config-path", default=None, help="Path to configuration file.")
+@click.option("--host", default=None, help="OpenAI host.")
+@click.option("--api-key", default=None, help="OpenAI API key.")
+@click.option("--model", default=None, help="OpenAI model.")
+@click.option("--max-tokens", default=None, help="OpenAI max tokens.")
+def cli(config_path: str, host: str, api_key: str, model: str, max_tokens: int):
+    global_configs["config_path"] = config_path
+    global_configs["host"] = host
+    global_configs["api_key"] = api_key
+    global_configs["model"] = model
+    global_configs["max_tokens"] = max_tokens
 
 
 @cli.command("list", help="List packages.")
@@ -37,8 +44,7 @@ def cli(ctx, config_path: str):
 @click.option(
     "--count", "-C", is_flag=True, default=False, help="Show count of packages."
 )
-@click.pass_context
-def list_packages(ctx, installed: bool, upgradable: bool, count: bool):
+def list_packages(installed: bool, upgradable: bool, count: bool):
     package_manager = PackageManager()
     packages = package_manager.list_packages(
         only_installed=installed, only_upgradable=upgradable
@@ -51,31 +57,27 @@ def list_packages(ctx, installed: bool, upgradable: bool, count: bool):
 
 
 @cli.command(help="Update the index of available packages.")
-@click.pass_context
-def update(ctx):
+def update():
     package_manager = PackageManager()
     package_manager.update()
 
 
 @cli.command(help="Upgrade all available packages.")
-@click.pass_context
-def upgrade(ctx):
+def upgrade():
     package_manager = PackageManager()
     package_manager.upgrade()
 
 
 @cli.command(help="Install packages.")
 @click.argument("package_names", nargs=-1, required=True)
-@click.pass_context
-def install(ctx, package_names: List[str]):
+def install(package_names: List[str]):
     package_manager = PackageManager()
     package_manager.install(package_names)
 
 
 @cli.command(help="Uninstall packages.")
 @click.argument("package_names", nargs=-1, required=True)
-@click.pass_context
-def uninstall(ctx, package_names: List[str]):
+def uninstall(package_names: List[str]):
     package_manager = PackageManager()
     package_manager.uninstall(package_names)
 
@@ -105,8 +107,7 @@ def uninstall(ctx, package_names: List[str]):
     default=1024,
     help="Maximum number of tokens to be generated, default is 1024, can be specified with environment variable OPENAI_MAX_TOKENS, 8192 is openai's max value when using gpt-3.5-turbo",
 )
-@click.pass_context
-def helper_config(ctx, host: str, api_key: str, model: str, max_tokens: int):
+def helper_config(host: str, api_key: str, model: str, max_tokens: int):
     if all([v is not None for v in [host, api_key, model, max_tokens]]):
         ai_helper = AIHelper(
             host=host, api_key=api_key, model=model, max_tokens=max_tokens
@@ -131,7 +132,7 @@ def helper_config(ctx, host: str, api_key: str, model: str, max_tokens: int):
             click.confirm(
                 "Some configuration is invalid, still want to save?", abort=True
             )
-        set_configuration(path=ctx.obj["config_path"], conf=ai_helper.config())
+        set_configuration(path=global_configs["config_path"], conf=ai_helper.config())
     else:
         click.confirm(
             "Not all configuration is specified, still want to save?", abort=True
@@ -139,4 +140,4 @@ def helper_config(ctx, host: str, api_key: str, model: str, max_tokens: int):
         ai_helper = AIHelper(
             host=host, api_key=api_key, model=model, max_tokens=max_tokens
         )
-        set_configuration(path=ctx.obj["config_path"], conf=ai_helper.config())
+        set_configuration(path=global_configs["config_path"], conf=ai_helper.config())
