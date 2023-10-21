@@ -1,4 +1,5 @@
 from .process import execute_command as _execute_command, CommandExecutionError
+from .process import just_execute
 from .ai_helper import (
     AIHelper,
     AIHelperHostError,

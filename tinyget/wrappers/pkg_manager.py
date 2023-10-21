@@ -18,7 +18,7 @@ class PackageManagerBase:
     def upgrade(self):
         raise NotImplementedError
 
-    def search(self, keyword, limit=10) -> List[Package]:
+    def search(self, package):
         raise NotImplementedError
 
     def get_package(self, package_name: str) -> Package:
