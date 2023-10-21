@@ -29,8 +29,17 @@ def get_os_package_manager(possible_package_manager_names: List[str]):
     raise Exception("No supported package manager found in PATH")
 
 
+def get_path_parts(path: str):
+    path = os.path.normpath(path)
+    path_list = []
+    while path != "/":
+        path_list.append(path)
+        path = os.path.dirname(path)
+    path_list.append("/")
+    return path_list
+
 @contextmanager
-def impersonate(username=os.environ.get("SUDO_USER")):
+def impersonate(username=os.environ.get("SUDO_USER"), config_path = None):
     """
     This code snippet defines a context manager function called impersonate. When used with the with statement, it temporarily impersonates a specified user by changing the current user and group IDs.
     If a username is provided, the function checks if the current user ID or group ID is different from the specified user's ID or group's ID. If they are different, the function changes the current user and group IDs to the specified user's IDs.
@@ -58,18 +67,30 @@ def impersonate(username=os.environ.get("SUDO_USER")):
             original_uid != user_info.pw_uid or original_gid != user_info.pw_gid
         )
 
-    if need_impersonate:
-        home_dir = user_info.pw_dir
-    else:
-        home_dir = os.environ["HOME"]
-    config_path = os.path.join(home_dir, ".tinyget.conf")
+    if config_path is None:
+        if need_impersonate:
+            home_dir = user_info.pw_dir
+        else:
+            home_dir = os.environ["HOME"]
+        config_path = os.path.join(home_dir, ".config", "tinyget", "config.json")
+    
+    not_exists = []
+    for sub_path in get_path_parts(config_path):
+        if not os.path.exists(sub_path):
+            not_exists.append(sub_path)
     try:
         yield config_path
     finally:
         if need_impersonate:
-            if os.path.exists(config_path):
-                os.chown(config_path, user_info.pw_uid, user_info.pw_gid)
-
+            for path in not_exists:
+                if os.path.exists(path):
+                    # Change ownership of the newly created config file to the impersonated user
+                    os.chown(path, user_info.pw_uid, user_info.pw_gid)
+        
+        if len(not_exists) > 0 and os.path.exists(config_path):
+            # This means the config file does not exist
+            # Change permissions of the newly created config file to 600
+            os.chmod(config_path, 0o600)
 
 def get_configuration(
     path: str = None, key: Union[str, List[str]] = None
@@ -92,7 +113,7 @@ def get_configuration(
     Raises:
         None
     """
-    with impersonate() as default_config_path:
+    with impersonate(config_path=path) as default_config_path:
         if path is None:
             path = default_config_path
         # Normalize key to list or None
@@ -142,13 +163,15 @@ def set_configuration(path: str = None, conf: Dict = {}):
     Returns:
     None
     """
-    with impersonate() as default_config_path:
+    with impersonate(config_path=path) as default_config_path:
         if path is None:
             path = default_config_path
         origin_config = get_configuration(path=path)
         for key, value in conf.items():
             origin_config[key] = value
-
+        
+        dir_path = os.path.dirname(path)
+        os.makedirs(dir_path, exist_ok=True)
         with open(path, "w") as f:
             json.dump(origin_config, f, indent=4)
 
@@ -184,9 +207,6 @@ def get_configuration_with_environ(path: str = None, key_environ: Dict[str, str]
 
 
 if __name__ == "__main__":
-    # set_configuration(conf={"host": "https://api.openai.com", "okok": "okok"})
-    with impersonate() as default_config_path:
-        print(default_config_path)
-        with open(default_config_path, "w") as f:
-            f.write("??????")
-        input("continue?")
+    # set_configuration(conf={"host": "https://api.openai.com", "okok": "okok"}, path="/home/kjdy/omg/test/test.json")
+    result = get_configuration(path="/home/kjdy/omg/test/test.json", key = ["host", "okok"])
+    print(result)
