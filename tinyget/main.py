@@ -86,6 +86,11 @@ def uninstall(package_names: List[str]):
     package_manager = PackageManager()
     package_manager.uninstall(package_names)
 
+@cli.command(help="Search package.")
+@click.argument("package", nargs=1, required=True)
+def search(package: str):
+    package_manager = PackageManager()
+    package_manager.search(package)
 
 @cli.command(help="Interactively set up ai_helper for tinyget.")
 @click.option(

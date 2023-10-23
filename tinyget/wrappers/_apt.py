@@ -1,6 +1,7 @@
 import re
 from .pkg_manager import PackageManagerBase
 from ..interact import execute_command as _execute_command
+from ..interact import just_execute
 from ..package import Package, ManagerType
 from typing import Union, List
 
@@ -174,9 +175,23 @@ class APT(PackageManagerBase):
         args = ["apt", "remove", "-y", *packages]
         return execute_command(args)
 
+    def search(self, package_name: str):
+        """
+        Searches for the specified package.
+
+        Args:
+            package_name (str): The name of the package to search for.
+
+        Returns:
+            The result of executing the command to search for the package.
+        """
+        args = ["apt", "search", package_name]
+        just_execute(args)
+
 
 if __name__ == "__main__":
-    pass
+    apt = APT()
+    apt.search("vim")
 
     # upgradable = 0
     # installed = 0

@@ -1,4 +1,5 @@
 from .process import execute_command as _execute_command, CommandExecutionError
+from .process import just_execute
 from .ai_helper import (
     AIHelper,
     AIHelperHostError,
@@ -26,7 +27,7 @@ def execute_command(args: Union[List[str], str], envp: dict = {}, timeout: int =
             console.print(
                 Panel(
                     "AI助手没有启动，可以通过tinyget config或tinyget ui配置后启动",
-                    border_style="grey",
+                    border_style="bright_black",
                 )
             )
         else:

@@ -1,6 +1,6 @@
 import re
 from .pkg_manager import PackageManagerBase
-from ..interact import execute_command
+from ..interact import execute_command, just_execute
 from ..package import Package, ManagerType
 from typing import Union, List
 
@@ -250,6 +250,19 @@ class DNF(PackageManagerBase):
         """
         args = ["dnf", "remove", "-y", *packages]
         return execute_command(args)
+
+    def search(self, package: str):
+        """
+        Searches for a package using the DNF package manager.
+
+        Parameters:
+            package (str): The name of the package to search for.
+
+        Returns:
+            The return value of the execute_command function.
+        """
+        args = ["dnf", "search", package]
+        just_execute(args)
 
 
 if __name__ == "__main__":
