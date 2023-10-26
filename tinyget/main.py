@@ -17,7 +17,7 @@ import os
 @click.option(
     "--config-path",
     default=None,
-    help="Path to configuration file, default is ~/.tinyget.conf.",
+    help="Path to configuration file, default is ~/.config/tinyget/config.json",
 )
 @click.option("--host", default=None, help="OpenAI host.")
 @click.option("--api-key", default=None, help="OpenAI API key.")
