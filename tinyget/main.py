@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
-from .wrappers import PackageManager, package_manager_name
+from .wrappers import PackageManager
 from .interact import AIHelper, AIHelperHostError, AIHelperKeyError
-from .common_utils import get_configuration, set_configuration
-from .package import show_packages
+from .common_utils import set_configuration
 from .globals import global_configs
 
 from typing import List
 from trogon import tui
 import click
-import sys
-import os
 
 
 @tui(command="ui", help="TinyGet UI")
@@ -86,11 +83,13 @@ def uninstall(package_names: List[str]):
     package_manager = PackageManager()
     package_manager.uninstall(package_names)
 
+
 @cli.command(help="Search package.")
 @click.argument("package", nargs=1, required=True)
 def search(package: str):
     package_manager = PackageManager()
     package_manager.search(package)
+
 
 @cli.command(help="Interactively set up ai_helper for tinyget.")
 @click.option(

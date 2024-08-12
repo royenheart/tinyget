@@ -3,7 +3,6 @@ from .pkg_manager import PackageManagerBase
 from ..interact import execute_command, CommandExecutionError, just_execute
 from ..package import Package, ManagerType
 from typing import Union, List, Dict
-import subprocess
 
 
 def get_installed_info(package_name: Union[List[str], str]) -> List[dict]:
@@ -285,10 +284,10 @@ class PACMAN(PackageManagerBase):
     def install(self, packages: List[str]):
         """
         Installs the specified packages using the `pacman` package manager.
-        
+
         Args:
             packages (List[str]): A list of package names to be installed.
-        
+
         Returns:
             None
         """
@@ -307,14 +306,14 @@ class PACMAN(PackageManagerBase):
         """
         args = ["pacman", "-Rns", "--noconfirm", *packages]
         return execute_command(args)
-    
+
     def search(self, package: str):
         """
         Searches for a package in the source.
-        
+
         Args:
             package (str): The name of the package to search for.
-        
+
         Returns:
             The result of the execute_command function.
         """

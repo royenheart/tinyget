@@ -1,7 +1,4 @@
-import os
-import sys
 import json
-import click
 import requests
 from typing import List, Dict, Any, Union
 from urllib.parse import urljoin, urlparse

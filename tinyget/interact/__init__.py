@@ -22,7 +22,9 @@ def execute_command(args: Union[List[str], str], envp: dict = {}, timeout: int =
         result = _execute_command(args, envp, timeout)
     except CommandExecutionError as e:
         console = Console()
-        console.print(Panel(traceback.format_exc(), border_style="red", title="命令执行失败"))
+        console.print(
+            Panel(traceback.format_exc(), border_style="red", title="命令执行失败")
+        )
         if ai_helper is None:
             console.print(
                 Panel(
