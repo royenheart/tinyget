@@ -1,5 +1,7 @@
 all: clean lint build uninstall install test
 
+NO_LINT ?= OFF
+
 build:
 	python -m build
 
@@ -21,5 +23,7 @@ test:
 	pytest
 
 lint:
+ifeq ($(NO_LINT),OFF)
 	flake8 ./tinyget --count --show-source --statistics
 	black ./tinyget --check --verbose
+endif
