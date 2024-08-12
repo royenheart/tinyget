@@ -1,10 +1,10 @@
-from setuptools import setup, find_packages
+"""Metadata hook."""
+
 from typing import List
+from hatchling.metadata.plugin.interface import MetadataHookInterface
 import os
 
 supported_package_managers = ["apt", "dnf", "pacman"]
-
-common_required_packages = ["requests", "click", "dataclasses", "rich", "trogon"]
 
 
 def get_os_package_manager(possible_package_manager_names: List[str]):
@@ -30,27 +30,25 @@ def get_os_package_manager(possible_package_manager_names: List[str]):
     raise Exception("No supported package manager found in PATH")
 
 
-current_package_manager = get_os_package_manager(supported_package_managers)
+class CheckDepsHook(MetadataHookInterface):
+    PLUGIN_NAME = "ckdeps"
 
-if current_package_manager == "apt":
-    specific_required_packages = []
-elif current_package_manager == "dnf":
-    specific_required_packages = []
-elif current_package_manager == "pacman":
-    specific_required_packages = []
-else:
-    raise Exception("No supported package manager found in PATH")
+    def update(self, metadata: dict) -> None:
+        try:
+            current_package_manager = get_os_package_manager(supported_package_managers)
+        except Exception as e:
+            print(f"{e}")
 
-required_packages = common_required_packages + specific_required_packages
+        common_deps = ["requests", "click", "dataclasses", "rich", "trogon"]
 
-setup(
-    name="tinyget",
-    version="0.0.1",
-    install_requires=required_packages,
-    packages=find_packages(),
-    author="kongjiadongyuan",
-    author_email="zhaggbl@outlook.com",
-    description="A tiny package manager for Linux",
-    license="MIT",
-    entry_points={"console_scripts": ["tinyget=tinyget.main:cli"]},
-)
+        if current_package_manager == "apt":
+            common_deps += []
+        elif current_package_manager == "dnf":
+            common_deps += []
+        elif current_package_manager == "pacman":
+            common_deps += []
+        else:
+            print(f"{current_package_manager} not support in tinyget")
+            common_deps += []
+
+        metadata["dependencies"] = common_deps

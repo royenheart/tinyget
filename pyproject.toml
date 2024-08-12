@@ -1,0 +1,53 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tinyget"
+dynamic = ["version", "dependencies"]
+requires-python = ">=3.6"
+authors = [
+    { name = "kongjiadongyuan", email = "zhaggbl@outlook.com" },
+    { name = "royenheart", email = "royenheart@outlook.com" },
+]
+description = "A tiny package manager for Linux"
+readme = "README.md"
+license = "GPL-2.0"
+keywords = ["TinyGet", "Package Manager"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: System :: Installation/Setup",
+]
+
+[project.optional-dependencies]
+dev = ["build", "black", "flake8", "pytest"]
+
+[project.urls]
+Documentation = "https://gitee.com/tinylab/tinyget#readme"
+Issues = "https://gitee.com/tinylab/tinyget/issues"
+Source = "https://gitee.com/tinylab/tinyget"
+
+[project.scripts]
+tinyget = "tinyget.main:cli"
+
+[tool.hatch.version]
+path = "tinyget/__about__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["tinyget", "pyproject.toml", "README.md", "LICENSE"]
+
+[tool.hatch.metadata.hooks.custom]
+
+[tool.black]
+line-length = 88
+include = '\.pyi?$'
+exclude = '''
+# A regex preceded with ^/ will apply only to files and directories
+# in the root of the project.
+(
+  ^__about__.py     # exclude a file named foo.py in the root of the project
+  | tinyget/wrappers/deprecated
+)
+'''
