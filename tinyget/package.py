@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Optional
 from enum import Enum
 from rich.table import Table
 from rich.console import Console
@@ -16,8 +16,8 @@ class Package:
     version: str = field(default_factory=str)
     installed: bool = field(default_factory=bool)
     automatically_installed: bool = field(default_factory=bool)
-    upgradable: str = field(default_factory=bool)
-    available_version: str = field(default_factory=str)
+    upgradable: bool = field(default_factory=bool)
+    available_version: Optional[str] = field(default_factory=str)
     remain: dict = field(default_factory=dict)
 
     def __repr__(self):

@@ -6,7 +6,7 @@ from .ai_helper import (
     AIHelperKeyError,
     try_to_get_ai_helper,
 )
-from typing import Union, List
+from typing import Optional, Union, List
 from rich.panel import Panel
 from rich.console import Console
 from rich.spinner import Spinner
@@ -14,10 +14,12 @@ import traceback
 import click
 import sys
 
-ai_helper = try_to_get_ai_helper()
+aihelper = try_to_get_ai_helper()
 
 
-def execute_command(args: Union[List[str], str], envp: dict = {}, timeout: int = None):
+def execute_command(
+    args: Union[List[str], str], envp: dict = {}, timeout: Optional[float] = None
+):
     try:
         result = _execute_command(args, envp, timeout)
     except CommandExecutionError as e:
@@ -25,7 +27,7 @@ def execute_command(args: Union[List[str], str], envp: dict = {}, timeout: int =
         console.print(
             Panel(traceback.format_exc(), border_style="red", title="命令执行失败")
         )
-        if ai_helper is None:
+        if aihelper is None:
             console.print(
                 Panel(
                     "AI助手没有启动，可以通过tinyget config或tinyget ui配置后启动",
@@ -36,7 +38,7 @@ def execute_command(args: Union[List[str], str], envp: dict = {}, timeout: int =
             with console.status(
                 "[bold green] AI助手已经激活，正在获取建议", spinner="bouncingBar"
             ) as status:
-                recommendation = ai_helper.fix_command(args, e.stdout, e.stderr)
+                recommendation = aihelper.fix_command(args, e.stdout, e.stderr)
             console.print(
                 Panel(
                     recommendation,

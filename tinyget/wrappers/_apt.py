@@ -3,10 +3,10 @@ from .pkg_manager import PackageManagerBase
 from ..interact import execute_command as _execute_command
 from ..interact import just_execute
 from ..package import Package, ManagerType
-from typing import Union, List
+from typing import Optional, Union, List
 
 
-def execute_command(args: Union[List[str], str], timeout: int = None):
+def execute_command(args: Union[List[str], str], timeout: Optional[float] = None):
     """
     Executes a command with the given arguments and optional timeout.
 

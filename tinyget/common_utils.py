@@ -1,4 +1,4 @@
-from typing import List, Dict, Union
+from typing import List, Dict, Optional, Union
 import click
 import pwd
 import json
@@ -43,7 +43,9 @@ def get_path_parts(path: str):
 
 
 @contextmanager
-def impersonate(username=os.environ.get("SUDO_USER"), config_path=None):
+def impersonate(
+    username=os.environ.get("SUDO_USER"), config_path: Optional[str] = None
+):
     """
     This code snippet defines a context manager function called impersonate. When used with the with statement, it temporarily impersonates a specified user by changing the current user and group IDs.
     If a username is provided, the function checks if the current user ID or group ID is different from the specified user's ID or group's ID. If they are different, the function changes the current user and group IDs to the specified user's IDs.
@@ -98,8 +100,8 @@ def impersonate(username=os.environ.get("SUDO_USER"), config_path=None):
 
 
 def get_configuration(
-    path: str = None, key: Union[str, List[str]] = None
-) -> Dict[str, str]:
+    path: Optional[str] = None, key: Optional[Union[str, List[str]]] = None
+) -> Dict[str, Optional[str]]:
     """
     Retrieves the configuration from a specified path and returns the values
     corresponding to the given key(s).
@@ -157,7 +159,7 @@ def get_configuration(
             return {key: configs[key] if key in configs else None for key in keys}
 
 
-def set_configuration(path: str = None, conf: Dict = {}):
+def set_configuration(path: Optional[str] = None, conf: Dict = {}):
     """
     Set the configuration by updating the specified path with the given configuration.
 
@@ -181,7 +183,9 @@ def set_configuration(path: str = None, conf: Dict = {}):
             json.dump(origin_config, f, indent=4)
 
 
-def get_configuration_with_environ(path: str = None, key_environ: Dict[str, str] = {}):
+def get_configuration_with_environ(
+    path: Optional[str] = None, key_environ: Dict[str, str] = {}
+):
     """
     This code defines a function get_configuration_with_environ that retrieves configuration values from multiple sources and returns them as a dictionary. The function takes two parameters: path, which is the path to the configuration file (if not provided, the default configuration file is used), and key_environ, which is a dictionary mapping configuration keys to environment variable names. The function first gets the configuration values from the specified file or the default file. Then, for each key in key_environ, it checks if there is a corresponding environment variable with the given name. If found, the value is added to the result dictionary. If not found, it checks if there is a global configuration value for the key. If found, the value is added to the result dictionary. If neither the environment variable nor the global configuration value is found, the value from the configuration file is added to the result dictionary. Finally, the function returns the resulting dictionary.
 

@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Optional, Union
 import subprocess
 import os
 
@@ -20,7 +20,7 @@ class CommandExecutionError(Exception):
         """
         super().__init__(message)
         print(message)
-        self.args = args
+        self.args = tuple(args)
         self.envp = envp
         self.stdout = stdout
         self.stderr = stderr
@@ -57,7 +57,9 @@ def spawn(args: Union[List[str], str], envp: dict = {}):
     )
 
 
-def execute_command(args: Union[List[str], str], envp: dict = {}, timeout: int = None):
+def execute_command(
+    args: Union[List[str], str], envp: dict = {}, timeout: Optional[float] = None
+):
     """
     Execute a command and capture its stdout and stderr.
 
@@ -77,7 +79,7 @@ def execute_command(args: Union[List[str], str], envp: dict = {}, timeout: int =
     if p.returncode != 0:
         raise CommandExecutionError(
             message=f"Executing command failed {args} with {envp}",
-            args=args,
+            args=list(args),
             envp=envp,
             stdout=stdout.decode(),
             stderr=stderr.decode(),

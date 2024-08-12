@@ -1,6 +1,6 @@
 import json
 import requests
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any, Optional, Union
 from urllib.parse import urljoin, urlparse
 
 from ..common_utils import get_configuration_with_environ
@@ -71,7 +71,7 @@ def do_completion(
     temperature: float,
     messages: List[Dict[str, str]],
     max_tokens: int,
-) -> str:
+) -> Dict:
     """
     Perform completion using the OpenAI GPT-3 model.
 
@@ -107,7 +107,11 @@ def do_completion(
 
 class AIHelper:
     def __init__(
-        self, host: str, api_key: str, model: str = None, max_tokens: int = 1024
+        self,
+        host: str,
+        api_key: str,
+        model: Optional[str] = None,
+        max_tokens: int = 1024,
     ):
         """
         Initializes the class instance with the provided parameters.
@@ -177,7 +181,7 @@ class AIHelper:
         except Exception:
             raise AIHelperKeyError("Invalid key", self.host, self.api_key, response)
 
-    def model_available(self, model: str = None) -> bool:
+    def model_available(self, model: Optional[str] = None) -> bool:
         """
         Check if a model is available.
 
@@ -251,7 +255,10 @@ class AIHelper:
         return answer
 
     def fix_command(
-        self, command: Union[List[str], str], stdout: str = None, stderr: str = None
+        self,
+        command: Union[List[str], str],
+        stdout: Optional[str] = None,
+        stderr: Optional[str] = None,
     ) -> str:
         """
         Executes a command and returns the answer obtained from asking a question based on the command, stdout, and stderr.
