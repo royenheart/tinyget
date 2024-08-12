@@ -1,6 +1,13 @@
 import subprocess
+import pytest
 
-command = "while true; do ls; sleep 1; done"
-p = subprocess.Popen(
-    command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-)
+
+def test_subprocess_cmd():
+    command = "ls"
+    subprocess.Popen(
+        command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+
+
+if __name__ == "__main__":
+    pytest.main([__file__])
