@@ -1,0 +1,10 @@
+{
+	"name": "TinyGet PACMAN Test",
+	"shutdownAction": "none",
+	"build": {
+		"context": "../..",
+		"dockerfile": "Dockerfile"
+	},
+	"postCreateCommand": "python3 --version",
+	"remoteUser": "root"
+}

@@ -1,0 +1,13 @@
+{
+	"name": "TinyGet APT Test",
+	"shutdownAction": "none",
+	"build": {
+		"context": "../..",
+		"dockerfile": "Dockerfile"
+	},
+	"features": {
+		"ghcr.io/itsmechlark/features/act:1": {}
+	},
+	"postCreateCommand": "python3 --version",
+	"remoteUser": "root"
+}
