@@ -3,6 +3,7 @@ import click
 import pwd
 import json
 import os
+import logging
 from contextlib import contextmanager
 
 from .globals import global_configs
@@ -40,6 +41,22 @@ def get_path_parts(path: str):
         path = os.path.dirname(path)
     path_list.append("/")
     return path_list
+
+
+logger = logging.getLogger()
+
+
+def setup_logger(debug: bool):
+    if debug:
+        logging.basicConfig(
+            level=logging.DEBUG,
+            format="%(asctime)s %(levelname)s - %(name)s: %(message)s",
+        )
+    else:
+        logging.basicConfig(
+            level=logging.WARNING,
+            format="%(asctime)s %(levelname)s - %(name)s: %(message)s",
+        )
 
 
 @contextmanager
