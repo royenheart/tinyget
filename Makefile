@@ -3,7 +3,7 @@ all: clean lint build uninstall install test
 NO_LINT ?= OFF
 
 build:
-	python -m build
+	python -m build --wheel
 
 clean:
 	rm -rf dist
