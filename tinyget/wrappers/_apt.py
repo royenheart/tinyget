@@ -43,8 +43,8 @@ def get_all_packages() -> List[Package]:
     architecture_regex = r"(?P<architecture>.+)"
     install_status_regex = r"(?P<install_status>.+)"
     description_regex = r"(?P<description>.+)"
-    installed_pattern = f"^{package_name_regex}/{repo_regex}\s{version_regex}\s{architecture_regex}\s\[{install_status_regex}\]\n  {description_regex}$"
-    uninstalled_pattern = f"^{package_name_regex}/{repo_regex}\s{version_regex}\s{architecture_regex}\n  {description_regex}$"
+    installed_pattern = rf"^{package_name_regex}/{repo_regex}\s{version_regex}\s{architecture_regex}\s\[{install_status_regex}\]\n  {description_regex}$"
+    uninstalled_pattern = rf"^{package_name_regex}/{repo_regex}\s{version_regex}\s{architecture_regex}\n  {description_regex}$"
     installed_regex = re.compile(installed_pattern, re.MULTILINE)
     uninstalled_regex = re.compile(uninstalled_pattern, re.MULTILINE)
 
