@@ -1,4 +1,4 @@
-all: clean lint build uninstall install test
+all: clean lint build pre-test uninstall install post-test
 
 NO_LINT ?= OFF
 
@@ -18,9 +18,13 @@ uninstall:
 		echo "tinyget not installed."; \
 	fi
 
-.PHONY: test
-test:
-	pytest
+.PHONY: pre-test
+pre-test:
+	PYTHONPATH=. pytest -k 'not test_cli'
+
+.PHONY: post-test
+post-test:
+	pytest -k 'test_cli'
 
 lint:
 ifeq ($(NO_LINT),OFF)
