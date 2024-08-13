@@ -2,6 +2,7 @@ import re
 from .pkg_manager import PackageManagerBase
 from ..interact import execute_command, just_execute
 from ..package import Package, ManagerType
+from ..common_utils import logger
 from typing import Union, List
 
 
@@ -151,10 +152,16 @@ def get_all_packages() -> List[Package]:
     installed_package_info_list = repoquery(flags="--installed")
     for info in installed_package_info_list:
         uid = get_unique_id(info)
-        new_info = package_info_dict[uid]
-        new_info["reason"] = info["reason"]
-        new_info["installtime"] = info["installtime"]
-        package_info_dict[uid] = new_info
+        try:
+            new_info = package_info_dict[uid]
+            new_info["reason"] = info["reason"]
+            new_info["installtime"] = info["installtime"]
+            package_info_dict[uid] = new_info
+        except KeyError as e:
+            logger.debug(
+                f"{uid} installed but not in any repo, see as userinstalled: {e}"
+            )
+            package_info_dict[uid] = info
 
     # Query upgradable packages
     upgradable_package_info_list = check_update()
