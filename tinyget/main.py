@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from .wrappers import PackageManager
 from .interact import AIHelper, AIHelperHostError, AIHelperKeyError
-from .common_utils import set_configuration
+from .common_utils import set_configuration, setup_logger
 from .globals import global_configs
 
 from typing import List
@@ -16,16 +16,20 @@ import click
     default=None,
     help="Path to configuration file, default is ~/.config/tinyget/config.json",
 )
+@click.option("--debug", default=False, help="Enable debug logs")
 @click.option("--host", default=None, help="OpenAI host.")
 @click.option("--api-key", default=None, help="OpenAI API key.")
 @click.option("--model", default=None, help="OpenAI model.")
 @click.option("--max-tokens", default=None, help="OpenAI max tokens.")
-def cli(config_path: str, host: str, api_key: str, model: str, max_tokens: int):
+def cli(
+    config_path: str, debug: bool, host: str, api_key: str, model: str, max_tokens: int
+):
     global_configs["config_path"] = config_path
     global_configs["host"] = host
     global_configs["api_key"] = api_key
     global_configs["model"] = model
     global_configs["max_tokens"] = max_tokens
+    setup_logger(debug=debug)
 
 
 @cli.command("list", help="List packages.")
