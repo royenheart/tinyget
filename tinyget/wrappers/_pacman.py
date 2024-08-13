@@ -1,5 +1,6 @@
 import re
 import traceback
+from tinyget.common_utils import logger
 from tinyget.globals import ERROR_HANDLED, ERROR_UNKNOWN
 from tinyget.interact.process import CommandExecutionError
 from rich.console import Console
@@ -293,20 +294,18 @@ class PACMAN(PackageManagerBase):
         console = Console()
         try:
             packages = get_all_packages()
-        except CommandExecutionError:
+        except CommandExecutionError as e:
             console.print(
                 Panel(
-                    traceback.format_exc(),
+                    f"Output: {e.stdout}\nError: {e.stderr}",
                     border_style="red",
                     title="Operation Failed",
                 )
             )
+            logger.debug(f"{traceback.format_exc()}")
         except Exception as e:
-            console.print(
-                Panel(
-                    traceback.format_exc(), border_style="red", title="Operation Failed"
-                )
-            )
+            console.print(Panel(f"{e}", border_style="red", title="Operation Failed"))
+            logger.debug(f"{traceback.format_exc()}")
         # Process filter
         if only_installed:
             packages = [package for package in packages if package.installed]
@@ -326,23 +325,25 @@ class PACMAN(PackageManagerBase):
         console = Console()
         try:
             result = execute_pacman_command(args)
-        except CommandExecutionError:
+        except CommandExecutionError as e:
             console.print(
                 Panel(
-                    traceback.format_exc(),
+                    f"Output: {e.stdout}\nError: {e.stderr}",
                     border_style="red",
                     title="Operation Failed",
                 )
             )
+            logger.debug(f"{traceback.format_exc()}")
             return (None, None, ERROR_HANDLED)
-        except Exception:
+        except Exception as e:
             console.print(
                 Panel(
-                    traceback.format_exc(),
+                    f"{e}",
                     border_style="red",
                     title="Operation Failed",
                 )
             )
+            logger.debug(f"{traceback.format_exc()}")
             return (None, None, ERROR_UNKNOWN)
         return result
 
@@ -356,23 +357,25 @@ class PACMAN(PackageManagerBase):
         console = Console()
         try:
             result = execute_pacman_command(args)
-        except CommandExecutionError:
+        except CommandExecutionError as e:
             console.print(
                 Panel(
-                    traceback.format_exc(),
+                    f"Output: {e.stdout}\nError: {e.stderr}",
                     border_style="red",
                     title="Operation Failed",
                 )
             )
+            logger.debug(f"{traceback.format_exc()}")
             return (None, None, ERROR_HANDLED)
-        except Exception:
+        except Exception as e:
             console.print(
                 Panel(
-                    traceback.format_exc(),
+                    f"{e}",
                     border_style="red",
                     title="Operation Failed",
                 )
             )
+            logger.debug(f"{traceback.format_exc()}")
             return (None, None, ERROR_UNKNOWN)
         return result
 
@@ -393,11 +396,12 @@ class PACMAN(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    traceback.format_exc(),
+                    f"Output: {e.stdout}\nError: {e.stderr}",
                     border_style="red",
                     title="Operation Failed",
                 )
             )
+            logger.debug(f"{traceback.format_exc()}")
             if aihelper is None:
                 console.print(
                     Panel(
@@ -419,14 +423,15 @@ class PACMAN(PackageManagerBase):
                     )
                 )
             return (None, None, ERROR_HANDLED)
-        except Exception:
+        except Exception as e:
             console.print(
                 Panel(
-                    traceback.format_exc(),
+                    f"{e}",
                     border_style="red",
                     title="Operation Failed",
                 )
             )
+            logger.debug(f"{traceback.format_exc()}")
             return (None, None, ERROR_UNKNOWN)
         return result
 
@@ -447,11 +452,12 @@ class PACMAN(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    traceback.format_exc(),
+                    f"Output: {e.stdout}\nError: {e.stderr}",
                     border_style="red",
                     title="Operation Failed",
                 )
             )
+            logger.debug(f"{traceback.format_exc()}")
             if aihelper is None:
                 console.print(
                     Panel(
@@ -473,14 +479,15 @@ class PACMAN(PackageManagerBase):
                     )
                 )
             return (None, None, ERROR_HANDLED)
-        except Exception:
+        except Exception as e:
             console.print(
                 Panel(
-                    traceback.format_exc(),
+                    f"{e}",
                     border_style="red",
                     title="Operation Failed",
                 )
             )
+            logger.debug(f"{traceback.format_exc()}")
             return (None, None, ERROR_UNKNOWN)
         return result
 

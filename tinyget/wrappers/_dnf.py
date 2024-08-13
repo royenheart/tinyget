@@ -274,20 +274,24 @@ class DNF(PackageManagerBase):
         console = Console()
         try:
             package_list = get_all_packages()
-        except CommandExecutionError:
+        except CommandExecutionError as e:
             console.print(
                 Panel(
-                    traceback.format_exc(),
+                    f"Output: {e.stdout}\nError: {e.stderr}",
                     border_style="red",
                     title="Operation Failed",
                 )
             )
+            logger.debug(f"{traceback.format_exc()}")
         except Exception as e:
             console.print(
                 Panel(
-                    traceback.format_exc(), border_style="red", title="Operation Failed"
+                    f"{e}",
+                    border_style="red",
+                    title="Operation Failed",
                 )
             )
+            logger.debug(f"{traceback.format_exc()}")
         # Process filter
         if only_installed:
             package_list = [p for p in package_list if p.installed]
@@ -305,23 +309,25 @@ class DNF(PackageManagerBase):
         console = Console()
         try:
             result = execute_dnf_command(args)
-        except CommandExecutionError:
+        except CommandExecutionError as e:
             console.print(
                 Panel(
-                    traceback.format_exc(),
+                    f"Output: {e.stdout}\nError: {e.stderr}",
                     border_style="red",
                     title="Operation Failed",
                 )
             )
+            logger.debug(f"{traceback.format_exc()}")
             return (None, None, ERROR_HANDLED)
-        except Exception:
+        except Exception as e:
             console.print(
                 Panel(
-                    traceback.format_exc(),
+                    f"{e}",
                     border_style="red",
                     title="Operation Failed",
                 )
             )
+            logger.debug(f"{traceback.format_exc()}")
             return (None, None, ERROR_UNKNOWN)
         return result
 
@@ -335,23 +341,25 @@ class DNF(PackageManagerBase):
         console = Console()
         try:
             result = execute_dnf_command(args)
-        except CommandExecutionError:
+        except CommandExecutionError as e:
             console.print(
                 Panel(
-                    traceback.format_exc(),
+                    f"Output: {e.stdout}\nError: {e.stderr}",
                     border_style="red",
                     title="Operation Failed",
                 )
             )
+            logger.debug(f"{traceback.format_exc()}")
             return (None, None, ERROR_HANDLED)
-        except Exception:
+        except Exception as e:
             console.print(
                 Panel(
-                    traceback.format_exc(),
+                    f"{e}",
                     border_style="red",
                     title="Operation Failed",
                 )
             )
+            logger.debug(f"{traceback.format_exc()}")
             return (None, None, ERROR_UNKNOWN)
         return result
 
@@ -372,11 +380,12 @@ class DNF(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    traceback.format_exc(),
+                    f"Output: {e.stdout}\nError: {e.stderr}",
                     border_style="red",
                     title="Operation Failed",
                 )
             )
+            logger.debug(f"{traceback.format_exc()}")
             if aihelper is None:
                 console.print(
                     Panel(
@@ -398,14 +407,15 @@ class DNF(PackageManagerBase):
                     )
                 )
             return (None, None, ERROR_HANDLED)
-        except Exception:
+        except Exception as e:
             console.print(
                 Panel(
-                    traceback.format_exc(),
+                    f"{e}",
                     border_style="red",
                     title="Operation Failed",
                 )
             )
+            logger.debug(f"{traceback.format_exc()}")
             return (None, None, ERROR_UNKNOWN)
         return result
 
@@ -426,11 +436,12 @@ class DNF(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    traceback.format_exc(),
+                    f"Output: {e.stdout}\nError: {e.stderr}",
                     border_style="red",
                     title="Operation Failed",
                 )
             )
+            logger.debug(f"{traceback.format_exc()}")
             if aihelper is None:
                 console.print(
                     Panel(
@@ -452,14 +463,15 @@ class DNF(PackageManagerBase):
                     )
                 )
             return (None, None, ERROR_HANDLED)
-        except Exception:
+        except Exception as e:
             console.print(
                 Panel(
-                    traceback.format_exc(),
+                    f"{e}",
                     border_style="red",
                     title="Operation Failed",
                 )
             )
+            logger.debug(f"{traceback.format_exc()}")
             return (None, None, ERROR_UNKNOWN)
         return result
 
