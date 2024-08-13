@@ -12,7 +12,7 @@ authors = [
 ]
 description = "A tiny package manager for Linux"
 readme = "README.md"
-license = "GPL-2.0"
+license = "GPL-2.0-or-later"
 keywords = ["TinyGet", "Package Manager"]
 classifiers = [
     "Development Status :: 3 - Alpha",
