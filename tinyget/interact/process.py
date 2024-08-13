@@ -1,4 +1,5 @@
 from typing import List, Optional, Union
+from tinyget.common_utils import logger
 import subprocess
 import os
 
@@ -19,7 +20,7 @@ class CommandExecutionError(Exception):
             None
         """
         super().__init__(message)
-        print(message)
+        logger.debug(message)
         self.args = tuple(args)
         self.envp = envp
         self.stdout = stdout

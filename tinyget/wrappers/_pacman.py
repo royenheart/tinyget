@@ -323,6 +323,6 @@ class PACMAN(PackageManagerBase):
 
 if __name__ == "__main__":
     pacman = PACMAN()
-    stdout, stderr = pacman.install(["wget"])
-    print(stdout)
-    print(stderr)
+    stdout, stderr, retcode = pacman.install(["wget"])
+    logger.debug(stdout)
+    logger.debug(stderr)

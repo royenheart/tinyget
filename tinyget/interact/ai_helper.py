@@ -3,7 +3,7 @@ import requests
 from typing import List, Dict, Any, Optional, Union
 from urllib.parse import urljoin, urlparse
 
-from ..common_utils import get_configuration_with_environ
+from ..common_utils import get_configuration_with_environ, logger
 from ..globals import global_configs
 
 SYSTEM_PROMPT = """
@@ -325,4 +325,4 @@ def try_to_get_ai_helper():
 
 if __name__ == "__main__":
     ai_helper = try_to_get_ai_helper()
-    print(ai_helper)
+    logger.debug(ai_helper)

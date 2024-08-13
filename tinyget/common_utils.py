@@ -237,4 +237,5 @@ if __name__ == "__main__":
     result = get_configuration(
         path="/home/kjdy/omg/test/test.json", key=["host", "okok"]
     )
-    print(result)
+    setup_logger(True)
+    logger.debug(result)

@@ -10,6 +10,7 @@ from typing import Optional, Union, List
 from rich.panel import Panel
 from rich.console import Console
 from rich.spinner import Spinner
+from ..common_utils import logger
 import traceback
 import click
 import sys
@@ -20,6 +21,7 @@ aihelper = try_to_get_ai_helper()
 def execute_command(
     args: Union[List[str], str], envp: dict = {}, timeout: Optional[float] = None
 ):
+    logger.debug(f"Execute command: {args}. Env params: {envp}")
     try:
         result = _execute_command(args, envp, timeout)
     except CommandExecutionError as e:
