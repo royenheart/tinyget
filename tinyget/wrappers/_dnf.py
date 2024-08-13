@@ -1,9 +1,74 @@
 import re
+import traceback
+
+from tinyget.globals import ERROR_HANDLED, ERROR_UNKNOWN
+from tinyget.interact.process import CommandExecutionError
+from rich.console import Console
+from rich.panel import Panel
 from .pkg_manager import PackageManagerBase
-from ..interact import execute_command, just_execute
+from ..interact import execute_command as _execute_command, just_execute
 from ..package import Package, ManagerType
 from ..common_utils import logger
-from typing import Union, List
+from typing import Optional, Union, List
+from tinyget.interact import try_to_get_ai_helper
+
+aihelper = try_to_get_ai_helper()
+
+
+def execute_dnf_command(args: List[str], timeout: Optional[float] = None):
+    """
+    Executes dnf with the given arguments and optional timeout.
+
+    Parameters:
+        args (List[str]): The arguments to pass to the dnf. Should be a list of strings.
+        timeout (int, optional): The maximum time to wait for the dnf to complete, in seconds. Defaults to None.
+
+    Returns:
+        The result of executing the dnf.
+
+    """
+    envp = {}
+    args.insert(0, "dnf")
+    out, err, retcode = _execute_command(args, envp, timeout)
+    # see 'man dnf'
+    if retcode == 0:
+        # Operation successful
+        return (out, err, retcode)
+    elif retcode == 1:
+        raise CommandExecutionError(
+            message=f"An error occurred when executing {args} with {envp}, was handled by dnf",
+            args=list(args),
+            envp=envp,
+            stdout=out,
+            stderr=err,
+        )
+    elif retcode == 3:
+        raise CommandExecutionError(
+            message=f"An unknown unhandled error occurred during operation {args} with {envp}",
+            args=list(args),
+            envp=envp,
+            stdout=out,
+            stderr=err,
+        )
+    elif retcode == 100:
+        # there are updates available and a list of updates are printed
+        return (out, err, retcode)
+    elif retcode == 200:
+        raise CommandExecutionError(
+            message=f"Problem with acquiring or releasing of locks raised during operation {args} with {envp}",
+            args=list(args),
+            envp=envp,
+            stdout=out,
+            stderr=err,
+        )
+    else:
+        raise CommandExecutionError(
+            message=f"Unknown dnf error during operation {args} with {envp}",
+            args=list(args),
+            envp=envp,
+            stdout=out,
+            stderr=err,
+        )
 
 
 def get_unique_id(package_info: dict):
@@ -76,9 +141,9 @@ def repoquery(flags: Union[List[str], str] = []):
     format_string = "^^^"
     format_string += "|^".join(format_tags)
     format_string += "$$$"
-    args = ["dnf", "repoquery", *flags, "--queryformat", format_string]
+    args = ["repoquery", *flags, "--queryformat", format_string]
 
-    stdout, stderr = execute_command(args)
+    stdout, stderr, retcode = execute_dnf_command(args)
     regex = re.compile(r"\^\^\^(?P<line>.+)\$\$\$")
     matches = regex.finditer(stdout)
     lines = []
@@ -109,8 +174,8 @@ def check_update():
         - arch: the architecture of the package
         - repo: the repository where the package is located
     """
-    args = ["dnf", "check-update"]
-    stdout, stderr = execute_command(args)
+    args = ["check-update"]
+    stdout, stderr, retcode = execute_dnf_command(args)
     lines = stdout.split("\n")
     upgradable = []
     for line in lines:
@@ -206,7 +271,23 @@ class DNF(PackageManagerBase):
         Returns:
             List[Package]: A list of packages that match the specified filters.
         """
-        package_list = get_all_packages()
+        console = Console()
+        try:
+            package_list = get_all_packages()
+        except CommandExecutionError:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+        except Exception as e:
+            console.print(
+                Panel(
+                    traceback.format_exc(), border_style="red", title="Operation Failed"
+                )
+            )
         # Process filter
         if only_installed:
             package_list = [p for p in package_list if p.installed]
@@ -220,17 +301,59 @@ class DNF(PackageManagerBase):
 
         :return: The output of the command executed to update the system.
         """
-        args = ["dnf", "check-update", "-y"]
-        return execute_command(args)
+        args = ["check-update", "-y"]
+        console = Console()
+        try:
+            result = execute_dnf_command(args)
+        except CommandExecutionError:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            return (None, None, ERROR_HANDLED)
+        except Exception:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            return (None, None, ERROR_UNKNOWN)
+        return result
 
     def upgrade(self):
         """
         Upgrade the system by running the `dnf upgrade` command with the specified arguments.
 
-        :return: The output of the `execute_command` function.
+        :return: The output of the `execute_dnf_command` function.
         """
-        args = ["dnf", "upgrade", "--refresh", "-y"]
-        return execute_command(args)
+        args = ["upgrade", "--refresh", "-y"]
+        console = Console()
+        try:
+            result = execute_dnf_command(args)
+        except CommandExecutionError:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            return (None, None, ERROR_HANDLED)
+        except Exception:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            return (None, None, ERROR_UNKNOWN)
+        return result
 
     def install(self, packages: List[str]):
         """
@@ -240,10 +363,51 @@ class DNF(PackageManagerBase):
             packages (List[str]): A list of package names to install.
 
         Returns:
-            The return value of the execute_command function.
+            The return value of the execute_dnf_command function.
         """
-        args = ["dnf", "install", "-y", *packages]
-        return execute_command(args)
+        args = ["install", "-y", *packages]
+        console = Console()
+        try:
+            result = execute_dnf_command(args)
+        except CommandExecutionError as e:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            if aihelper is None:
+                console.print(
+                    Panel(
+                        "AI Helper not started, will enabled after configured by 'tinyget config'/'tinyget ui'",
+                        border_style="bright_black",
+                    )
+                )
+            else:
+                with console.status(
+                    "[bold green] AI Helper started, getting command advise",
+                    spinner="bouncingBar",
+                ) as status:
+                    recommendation = aihelper.fix_command(args, e.stdout, e.stderr)
+                console.print(
+                    Panel(
+                        recommendation,
+                        border_style="green",
+                        title="Advise from AI Helper",
+                    )
+                )
+            return (None, None, ERROR_HANDLED)
+        except Exception:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            return (None, None, ERROR_UNKNOWN)
+        return result
 
     def uninstall(self, packages: List[str]):
         """
@@ -255,8 +419,49 @@ class DNF(PackageManagerBase):
         Returns:
             None
         """
-        args = ["dnf", "remove", "-y", *packages]
-        return execute_command(args)
+        args = ["remove", "-y", *packages]
+        console = Console()
+        try:
+            result = execute_dnf_command(args)
+        except CommandExecutionError as e:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            if aihelper is None:
+                console.print(
+                    Panel(
+                        "AI Helper not started, will enabled after configured by 'tinyget config'/'tinyget ui'",
+                        border_style="bright_black",
+                    )
+                )
+            else:
+                with console.status(
+                    "[bold green] AI Helper started, getting command advise",
+                    spinner="bouncingBar",
+                ) as status:
+                    recommendation = aihelper.fix_command(args, e.stdout, e.stderr)
+                console.print(
+                    Panel(
+                        recommendation,
+                        border_style="green",
+                        title="Advise from AI Helper",
+                    )
+                )
+            return (None, None, ERROR_HANDLED)
+        except Exception:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            return (None, None, ERROR_UNKNOWN)
+        return result
 
     def search(self, package: str):
         """
@@ -274,4 +479,4 @@ class DNF(PackageManagerBase):
 
 if __name__ == "__main__":
     dnf = DNF()
-    stdout, stderr = dnf.install(["wget"])
+    stdout, stderr, retcode = dnf.install(["wget"])

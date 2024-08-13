@@ -1,8 +1,45 @@
 import re
+import traceback
+from tinyget.globals import ERROR_HANDLED, ERROR_UNKNOWN
+from tinyget.interact.process import CommandExecutionError
+from rich.console import Console
+from rich.panel import Panel
 from .pkg_manager import PackageManagerBase
-from ..interact import execute_command, CommandExecutionError, just_execute
+from ..interact import execute_command as _execute_command, just_execute
 from ..package import Package, ManagerType
-from typing import Union, List, Dict
+from typing import Optional, Union, List, Dict
+
+from tinyget.interact import try_to_get_ai_helper
+
+aihelper = try_to_get_ai_helper()
+
+
+def execute_pacman_command(args: List[str], timeout: Optional[float] = None):
+    """
+    Executes pacman with the given arguments and optional timeout.
+
+    Parameters:
+        args (List[str]): The arguments to pass to the pacman. Should be a list of strings.
+        timeout (int, optional): The maximum time to wait for the pacman to complete, in seconds. Defaults to None.
+
+    Returns:
+        The result of executing the dnf.
+
+    """
+    envp = {}
+    args.insert(0, "pacman")
+    out, err, retcode = _execute_command(args, envp, timeout)
+    if retcode == 0:
+        # Operation successful
+        return (out, err, retcode)
+    else:
+        raise CommandExecutionError(
+            message=f"Pacman Error during operation {args} with {envp}",
+            args=list(args),
+            envp=envp,
+            stdout=out,
+            stderr=err,
+        )
 
 
 def get_installed_info(package_name: Union[List[str], str]) -> List[dict]:
@@ -32,8 +69,8 @@ def get_installed_info(package_name: Union[List[str], str]) -> List[dict]:
         package_name_list = package_name
     else:
         raise ValueError("package_name must be a string or a list of strings")
-    args = ["pacman", "-Qi", "--noconfirm", *package_name_list]
-    stdout, stderr = execute_command(args)
+    args = ["-Qi", "--noconfirm", *package_name_list]
+    stdout, stderr, retcode = execute_pacman_command(args)
     if "was not found" in stderr and "error" in stderr:
         raise Exception(f"Package {package_name} not found in local db")
 
@@ -87,8 +124,8 @@ def get_available_info(package_name: Union[List[str], str]) -> List[dict]:
         package_name_list = package_name
     else:
         raise ValueError("package_name must be a string or a list of strings")
-    args = ["pacman", "-Si", *package_name_list]
-    stdout, stderr = execute_command(args)
+    args = ["-Si", *package_name_list]
+    stdout, stderr, retcode = execute_pacman_command(args)
     if "was not found" in stderr and "error" in stderr:
         raise Exception(f"Package {package_name} not found in source")
 
@@ -131,8 +168,8 @@ def get_all_package_name() -> List[str]:
     Returns:
         A list of strings containing the names of all packages.
     """
-    args = ["pacman", "-Ssq"]
-    stdout, stderr = execute_command(args)
+    args = ["-Ssq"]
+    stdout, stderr, retcode = execute_pacman_command(args)
     packages = [
         package_name for package_name in stdout.split("\n") if package_name != ""
     ]
@@ -146,8 +183,8 @@ def get_all_installed_package_name() -> List[str]:
     :return: A list of strings representing the names of installed packages.
     :rtype: List[str]
     """
-    args = ["pacman", "-Qq"]
-    stdout, stderr = execute_command(args)
+    args = ["-Qq"]
+    stdout, stderr, retcode = execute_pacman_command(args)
     packages = [
         package_name for package_name in stdout.split("\n") if package_name != ""
     ]
@@ -161,9 +198,9 @@ def get_upgradable() -> Dict[str, str]:
     Returns:
         A dictionary where the keys are the package names and the values are the available versions.
     """
-    args = ["pacman", "-Qu"]
+    args = ["-Qu"]
     try:
-        stdout, stderr = execute_command(args)
+        stdout, stderr, retcode = execute_pacman_command(args)
     except CommandExecutionError as e:
         # If there is no upgradable packages, pacman returns nonzero, which is not an error
         # So we need to check stderr
@@ -253,7 +290,23 @@ class PACMAN(PackageManagerBase):
         Returns:
             List[Package]: A list of packages that match the filter criteria.
         """
-        packages = get_all_packages()
+        console = Console()
+        try:
+            packages = get_all_packages()
+        except CommandExecutionError:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+        except Exception as e:
+            console.print(
+                Panel(
+                    traceback.format_exc(), border_style="red", title="Operation Failed"
+                )
+            )
         # Process filter
         if only_installed:
             packages = [package for package in packages if package.installed]
@@ -269,8 +322,29 @@ class PACMAN(PackageManagerBase):
 
         :return: The result of executing the command.
         """
-        args = ["pacman", "-Sy", "--noconfirm"]
-        return execute_command(args)
+        args = ["-Sy", "--noconfirm"]
+        console = Console()
+        try:
+            result = execute_pacman_command(args)
+        except CommandExecutionError:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            return (None, None, ERROR_HANDLED)
+        except Exception:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            return (None, None, ERROR_UNKNOWN)
+        return result
 
     def upgrade(self):
         """
@@ -278,8 +352,29 @@ class PACMAN(PackageManagerBase):
 
         :return: The result of executing the command.
         """
-        args = ["pacman", "-Syu", "--noconfirm"]
-        return execute_command(args)
+        args = ["-Syu", "--noconfirm"]
+        console = Console()
+        try:
+            result = execute_pacman_command(args)
+        except CommandExecutionError:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            return (None, None, ERROR_HANDLED)
+        except Exception:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            return (None, None, ERROR_UNKNOWN)
+        return result
 
     def install(self, packages: List[str]):
         """
@@ -291,8 +386,49 @@ class PACMAN(PackageManagerBase):
         Returns:
             None
         """
-        args = ["pacman", "-S", "--noconfirm", *packages]
-        return execute_command(args)
+        args = ["-S", "--noconfirm", *packages]
+        console = Console()
+        try:
+            result = execute_pacman_command(args)
+        except CommandExecutionError as e:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            if aihelper is None:
+                console.print(
+                    Panel(
+                        "AI Helper not started, will enabled after configured by 'tinyget config'/'tinyget ui'",
+                        border_style="bright_black",
+                    )
+                )
+            else:
+                with console.status(
+                    "[bold green] AI Helper started, getting command advise",
+                    spinner="bouncingBar",
+                ) as status:
+                    recommendation = aihelper.fix_command(args, e.stdout, e.stderr)
+                console.print(
+                    Panel(
+                        recommendation,
+                        border_style="green",
+                        title="Advise from AI Helper",
+                    )
+                )
+            return (None, None, ERROR_HANDLED)
+        except Exception:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            return (None, None, ERROR_UNKNOWN)
+        return result
 
     def uninstall(self, packages: List[str]):
         """
@@ -302,10 +438,51 @@ class PACMAN(PackageManagerBase):
             packages (List[str]): A list of package names to uninstall.
 
         Returns:
-            The result of the execute_command function.
+            The result of the execute_pacman_command function.
         """
-        args = ["pacman", "-Rns", "--noconfirm", *packages]
-        return execute_command(args)
+        args = ["-Rns", "--noconfirm", *packages]
+        console = Console()
+        try:
+            result = execute_pacman_command(args)
+        except CommandExecutionError as e:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            if aihelper is None:
+                console.print(
+                    Panel(
+                        "AI Helper not started, will enabled after configured by 'tinyget config'/'tinyget ui'",
+                        border_style="bright_black",
+                    )
+                )
+            else:
+                with console.status(
+                    "[bold green] AI Helper started, getting command advise",
+                    spinner="bouncingBar",
+                ) as status:
+                    recommendation = aihelper.fix_command(args, e.stdout, e.stderr)
+                console.print(
+                    Panel(
+                        recommendation,
+                        border_style="green",
+                        title="Advise from AI Helper",
+                    )
+                )
+            return (None, None, ERROR_HANDLED)
+        except Exception:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            return (None, None, ERROR_UNKNOWN)
+        return result
 
     def search(self, package: str):
         """
@@ -315,7 +492,7 @@ class PACMAN(PackageManagerBase):
             package (str): The name of the package to search for.
 
         Returns:
-            The result of the execute_command function.
+            The result of the execute_pacman_command function.
         """
         args = ["pacman", "-Ss", package]
         just_execute(args)

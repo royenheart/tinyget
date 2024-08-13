@@ -77,15 +77,7 @@ def execute_command(
     """
     p = spawn(args, envp)
     stdout, stderr = p.communicate(input=None, timeout=timeout)
-    if p.returncode != 0:
-        raise CommandExecutionError(
-            message=f"Executing command failed {args} with {envp}",
-            args=list(args),
-            envp=envp,
-            stdout=stdout.decode(),
-            stderr=stderr.decode(),
-        )
-    return stdout.decode(), stderr.decode()
+    return stdout.decode(), stderr.decode(), p.returncode
 
 
 def just_execute(args: Union[List[str], str]):

@@ -1,25 +1,46 @@
 import re
+import traceback
+
+from tinyget.globals import ERROR_HANDLED, ERROR_UNKNOWN
+from tinyget.interact.process import CommandExecutionError
+from rich.console import Console
+from rich.panel import Panel
 from .pkg_manager import PackageManagerBase
 from ..interact import execute_command as _execute_command
 from ..interact import just_execute
 from ..package import Package, ManagerType
-from typing import Optional, Union, List
+from typing import Optional, List
+from tinyget.interact import try_to_get_ai_helper
+
+aihelper = try_to_get_ai_helper()
 
 
-def execute_command(args: Union[List[str], str], timeout: Optional[float] = None):
+def execute_apt_command(args: List[str], timeout: Optional[float] = None):
     """
-    Executes a command with the given arguments and optional timeout.
+    Executes apt with the given arguments and optional timeout.
 
     Parameters:
-        args (Union[List[str], str]): The arguments to pass to the command. Can be a list of strings or a single string.
-        timeout (int, optional): The maximum time to wait for the command to complete, in seconds. Defaults to None.
+        args (List[str]): The arguments to pass to the apt. Can be a list of strings or a single string.
+        timeout (int, optional): The maximum time to wait for the apt to complete, in seconds. Defaults to None.
 
     Returns:
         The result of executing the command.
 
     """
     envp = {"DEBIAN_FRONTEND": "noninteractive"}
-    return _execute_command(args, envp, timeout)
+    args.insert(0, "apt")
+    out, err, retcode = _execute_command(args, envp, timeout)
+    if retcode == 0:
+        # Operation successful
+        return (out, err, retcode)
+    else:
+        raise CommandExecutionError(
+            message=f"APT error during operation {args} with {envp}",
+            args=list(args),
+            envp=envp,
+            stdout=out,
+            stderr=err,
+        )
 
 
 def get_all_packages() -> List[Package]:
@@ -32,8 +53,8 @@ def get_all_packages() -> List[Package]:
     Explains:
         This code defines a function get_all_packages() that retrieves a list of all installed and uninstalled packages on a system using the apt package manager. It executes the command apt list -v and parses the output to extract information about each package, such as the package name, repository, version, architecture, installation status, and description. It uses regular expressions to match and extract the relevant information from the output. The extracted information is then used to create Package objects, which are appended to a list and returned as the result.
     """
-    args = ["apt", "list", "-v"]
-    content, stderr = execute_command(args)
+    args = ["list", "-v"]
+    content, stderr, retcode = execute_apt_command(args)
 
     blocks = content.split("\n\n")
 
@@ -120,7 +141,23 @@ class APT(PackageManagerBase):
         Returns:
             List[Package]: A list of packages that match the specified filters.
         """
-        packages = get_all_packages()
+        console = Console()
+        try:
+            packages = get_all_packages()
+        except CommandExecutionError:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+        except Exception as e:
+            console.print(
+                Panel(
+                    traceback.format_exc(), border_style="red", title="Operation Failed"
+                )
+            )
         if only_upgradable:
             packages = [package for package in packages if package.upgradable]
         if only_installed:
@@ -133,8 +170,29 @@ class APT(PackageManagerBase):
 
         :return: The output of the 'apt update' command.
         """
-        args = ["apt", "update", "-y"]
-        return execute_command(args)
+        args = ["update", "-y"]
+        console = Console()
+        try:
+            result = execute_apt_command(args)
+        except CommandExecutionError:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            return (None, None, ERROR_HANDLED)
+        except Exception:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            return (None, None, ERROR_UNKNOWN)
+        return result
 
     def upgrade(self):
         """
@@ -144,10 +202,31 @@ class APT(PackageManagerBase):
             None
 
         Returns:
-            The output of the 'execute_command' function.
+            The output of the 'execute_apt_command' function.
         """
-        args = ["apt", "upgrade", "-y"]
-        return execute_command(args)
+        args = ["upgrade", "-y"]
+        console = Console()
+        try:
+            result = execute_apt_command(args)
+        except CommandExecutionError:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            return (None, None, ERROR_HANDLED)
+        except Exception:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            return (None, None, ERROR_UNKNOWN)
+        return result
 
     def install(self, packages: List[str]):
         """
@@ -159,8 +238,49 @@ class APT(PackageManagerBase):
         Returns:
             The result of executing the command to install the packages.
         """
-        args = ["apt", "install", "-y", *packages]
-        return execute_command(args)
+        args = ["install", "-y", *packages]
+        console = Console()
+        try:
+            result = execute_apt_command(args)
+        except CommandExecutionError as e:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            if aihelper is None:
+                console.print(
+                    Panel(
+                        "AI Helper not started, will enabled after configured by 'tinyget config'/'tinyget ui'",
+                        border_style="bright_black",
+                    )
+                )
+            else:
+                with console.status(
+                    "[bold green] AI Helper started, getting command advise",
+                    spinner="bouncingBar",
+                ) as status:
+                    recommendation = aihelper.fix_command(args, e.stdout, e.stderr)
+                console.print(
+                    Panel(
+                        recommendation,
+                        border_style="green",
+                        title="Advise from AI Helper",
+                    )
+                )
+            return (None, None, ERROR_HANDLED)
+        except Exception:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            return (None, None, ERROR_UNKNOWN)
+        return result
 
     def uninstall(self, packages: List[str]):
         """
@@ -172,8 +292,49 @@ class APT(PackageManagerBase):
         Returns:
             None: This function does not return anything.
         """
-        args = ["apt", "remove", "-y", *packages]
-        return execute_command(args)
+        args = ["remove", "-y", *packages]
+        console = Console()
+        try:
+            result = execute_apt_command(args)
+        except CommandExecutionError as e:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            if aihelper is None:
+                console.print(
+                    Panel(
+                        "AI Helper not started, will enabled after configured by 'tinyget config'/'tinyget ui'",
+                        border_style="bright_black",
+                    )
+                )
+            else:
+                with console.status(
+                    "[bold green] AI Helper started, getting command advise",
+                    spinner="bouncingBar",
+                ) as status:
+                    recommendation = aihelper.fix_command(args, e.stdout, e.stderr)
+                console.print(
+                    Panel(
+                        recommendation,
+                        border_style="green",
+                        title="Advise from AI Helper",
+                    )
+                )
+            return (None, None, ERROR_HANDLED)
+        except Exception:
+            console.print(
+                Panel(
+                    traceback.format_exc(),
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            return (None, None, ERROR_UNKNOWN)
+        return result
 
     def search(self, package_name: str):
         """
