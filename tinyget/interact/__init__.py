@@ -7,6 +7,9 @@ from .ai_helper import (
     try_to_get_ai_helper,
 )
 from typing import Optional, Union, List
+from rich.panel import Panel
+from rich.console import Console
+from rich.spinner import Spinner
 from ..common_utils import logger
 from tinyget.globals import global_configs
 
