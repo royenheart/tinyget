@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 from .wrappers import PackageManager
 from .interact import AIHelper, AIHelperHostError, AIHelperKeyError
-from .common_utils import set_configuration, setup_logger
+from .common_utils import (
+    get_config_path,
+    get_configuration,
+    set_configuration,
+    setup_logger,
+)
 from tinyget.globals import global_configs, DEFAULT_LIVE_OUTPUT
 from typing import List
 from trogon import tui
@@ -34,12 +39,20 @@ def cli(
     model: str,
     max_tokens: int,
 ):
+    config_path = get_config_path(path=config_path)
+    exist_config = get_configuration(path=config_path)
+    for k, v in exist_config.items():
+        global_configs[k] = v
     global_configs["live_output"] = live_output
     global_configs["config_path"] = config_path
-    global_configs["host"] = host
-    global_configs["api_key"] = api_key
-    global_configs["model"] = model
-    global_configs["max_tokens"] = max_tokens
+    if host is not None:
+        global_configs["host"] = host
+    if api_key is not None:
+        global_configs["api_key"] = api_key
+    if model is not None:
+        global_configs["model"] = model
+    if max_tokens is not None:
+        global_configs["max_tokens"] = str(max_tokens)
     setup_logger(debug=debug)
 
 

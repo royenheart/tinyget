@@ -176,6 +176,13 @@ def get_configuration(
             return {key: configs[key] if key in configs else None for key in keys}
 
 
+def get_config_path(path: Optional[str] = None) -> str:
+    with impersonate(config_path=path) as default_config_path:
+        if path is None:
+            path = default_config_path
+    return path
+
+
 def set_configuration(path: Optional[str] = None, conf: Dict = {}):
     """
     Set the configuration by updating the specified path with the given configuration.
