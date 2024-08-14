@@ -6,7 +6,7 @@ from tinyget.interact.process import CommandExecutionError
 from rich.console import Console
 from rich.panel import Panel
 from .pkg_manager import PackageManagerBase
-from ..interact import execute_command as _execute_command, just_execute
+from ..interact import execute_command as _execute_command
 from ..package import Package, ManagerType
 from typing import Optional, Union, List, Dict
 
@@ -71,9 +71,15 @@ def get_installed_info(package_name: Union[List[str], str]) -> List[dict]:
     else:
         raise ValueError("package_name must be a string or a list of strings")
     args = ["-Qi", "--noconfirm", *package_name_list]
-    stdout, stderr, retcode = execute_pacman_command(args)
-    if "was not found" in stderr and "error" in stderr:
-        raise Exception(f"Package {package_name} not found in local db")
+    try:
+        stdout, stderr, retcode = execute_pacman_command(args)
+    except CommandExecutionError as e:
+        stderr = e.stderr
+        if "was not found" in stderr and "error" in stderr:
+            logger.debug(f"Packages not found in local db: {stderr}")
+            stdout = e.stdout
+        else:
+            raise
 
     blocks = stdout.split("\n\n")
     info_list = []
@@ -126,9 +132,15 @@ def get_available_info(package_name: Union[List[str], str]) -> List[dict]:
     else:
         raise ValueError("package_name must be a string or a list of strings")
     args = ["-Si", *package_name_list]
-    stdout, stderr, retcode = execute_pacman_command(args)
-    if "was not found" in stderr and "error" in stderr:
-        raise Exception(f"Package {package_name} not found in source")
+    try:
+        stdout, stderr, retcode = execute_pacman_command(args)
+    except CommandExecutionError as e:
+        stderr = e.stderr
+        if "was not found" in stderr and "error" in stderr:
+            logger.debug(f"Packages not found in source: {stderr}")
+            stdout = e.stdout
+        else:
+            raise
 
     blocks = stdout.split("\n\n")
     info_list = []
@@ -192,22 +204,27 @@ def get_all_installed_package_name() -> List[str]:
     return packages
 
 
-def get_upgradable() -> Dict[str, str]:
+def get_upgradable(package_name: Union[List[str], str] = []) -> Dict[str, str]:
     """
     Retrieves a dictionary of upgradable packages and their available versions.
+
+    Args:
+        package_name (Union[List[str], str]): The name of the package or a list of package names.
 
     Returns:
         A dictionary where the keys are the package names and the values are the available versions.
     """
-    args = ["-Qu"]
+    args = ["-Qu", *package_name]
     try:
         stdout, stderr, retcode = execute_pacman_command(args)
     except CommandExecutionError as e:
         # If there is no upgradable packages, pacman returns nonzero, which is not an error
-        # So we need to check stderr
-        if e.stderr == "":
+        stderr = e.stderr
+        if "was not found" in stderr and "error" in stderr:
+            logger.debug(
+                f"Packages not in local db, so can't determine upgradable: {stderr}"
+            )
             stdout = e.stdout
-            stderr = e.stderr
         else:
             raise
     regex = re.compile(
@@ -501,8 +518,75 @@ class PACMAN(PackageManagerBase):
         Returns:
             The result of the execute_pacman_command function.
         """
-        args = ["pacman", "-Ss", package]
-        just_execute(args)
+        args = ["-Ss", package]
+        console = Console()
+        package_list = []
+        try:
+            out, err, retcode = execute_pacman_command(args)
+            pkgs = []
+            out = out.strip()
+            for l in out.split("\n"):
+                if not l.startswith(" "):
+                    pkgs.append(l.split(" ")[0].split("/")[-1])
+            installed_info = get_installed_info(pkgs)
+            package_info = get_available_info(pkgs)
+
+            installed_info_dict = {info["name"]: info for info in installed_info}
+            package_info_dict = {info["name"]: info for info in package_info}
+
+            upgradable_dict = get_upgradable(pkgs)
+
+            for name, info in package_info_dict.items():
+                if name in installed_info_dict:
+                    installed = True
+                    automatically_installed = (
+                        "Installed as a dependency"
+                        in installed_info_dict[name]["reason"]
+                    )
+                else:
+                    installed = False
+                    automatically_installed = False
+
+                if name in upgradable_dict:
+                    upgradable = True
+                    available_version = upgradable_dict[name]
+                else:
+                    upgradable = False
+                    available_version = None
+
+                remain = {"repo": [info["repo"]]}
+                pkg = Package(
+                    package_type=ManagerType.pacman,
+                    package_name=info["name"],
+                    architecture=info["architecture"],
+                    description=info["description"],
+                    version=info["version"],
+                    installed=installed,
+                    automatically_installed=automatically_installed,
+                    upgradable=upgradable,
+                    available_version=available_version,
+                    remain=remain,
+                )
+                package_list.append(pkg)
+        except CommandExecutionError as e:
+            console.print(
+                Panel(
+                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            logger.debug(f"{traceback.format_exc()}")
+        except Exception as e:
+            console.print(
+                Panel(
+                    f"{e}",
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            logger.debug(f"{traceback.format_exc()}")
+        return package_list
 
 
 if __name__ == "__main__":

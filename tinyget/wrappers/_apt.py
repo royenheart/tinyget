@@ -7,7 +7,6 @@ from rich.console import Console
 from rich.panel import Panel
 from .pkg_manager import PackageManagerBase
 from ..interact import execute_command as _execute_command
-from ..interact import just_execute
 from ..package import Package, ManagerType
 from typing import Optional, List
 from tinyget.interact import try_to_get_ai_helper
@@ -43,7 +42,7 @@ def execute_apt_command(args: List[str], timeout: Optional[float] = None):
         )
 
 
-def get_all_packages() -> List[Package]:
+def get_packages(softs: str = "") -> List[Package]:
     """
     Retrieves a list of all installed and uninstalled packages.
 
@@ -51,9 +50,11 @@ def get_all_packages() -> List[Package]:
         List[Package]: A list of Package objects representing the installed and uninstalled packages.
 
     Explains:
-        This code defines a function get_all_packages() that retrieves a list of all installed and uninstalled packages on a system using the apt package manager. It executes the command apt list -v and parses the output to extract information about each package, such as the package name, repository, version, architecture, installation status, and description. It uses regular expressions to match and extract the relevant information from the output. The extracted information is then used to create Package objects, which are appended to a list and returned as the result.
+        This code defines a function get_packages() that retrieves a list of all installed and uninstalled packages on a system using the apt package manager. It executes the command apt list -v and parses the output to extract information about each package, such as the package name, repository, version, architecture, installation status, and description. It uses regular expressions to match and extract the relevant information from the output. The extracted information is then used to create Package objects, which are appended to a list and returned as the result.
     """
     args = ["list", "-v"]
+    if softs != "":
+        args.append(softs)
     content, stderr, retcode = execute_apt_command(args)
 
     blocks = content.split("\n\n")
@@ -143,7 +144,7 @@ class APT(PackageManagerBase):
         """
         console = Console()
         try:
-            packages = get_all_packages()
+            packages = get_packages()
         except CommandExecutionError as e:
             console.print(
                 Panel(
@@ -352,8 +353,29 @@ class APT(PackageManagerBase):
         Returns:
             The result of executing the command to search for the package.
         """
-        args = ["apt", "search", package_name]
-        just_execute(args)
+        console = Console()
+        package_list = []
+        try:
+            package_list = get_packages(softs=f"{package_name}")
+        except CommandExecutionError as e:
+            console.print(
+                Panel(
+                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            logger.debug(f"{traceback.format_exc()}")
+        except Exception as e:
+            console.print(
+                Panel(
+                    f"{e}",
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            logger.debug(f"{traceback.format_exc()}")
+        return package_list
 
 
 if __name__ == "__main__":

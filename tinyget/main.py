@@ -88,11 +88,19 @@ def uninstall(package_names: List[str]):
     package_manager.uninstall(package_names)
 
 
-@cli.command(help="Search package.")
+@cli.command(help="Search package. Packages can be regex")
 @click.argument("package", nargs=1, required=True)
-def search(package: str):
+@click.option(
+    "--count", "-C", is_flag=True, default=False, help="Show count of packages."
+)
+def search(package: str, count: bool):
     package_manager = PackageManager()
-    package_manager.search(package)
+    packages = package_manager.search(package)
+    if count:
+        click.echo(f"{len(packages)} packages in total.")
+    else:
+        for package in packages:
+            click.echo(package)
 
 
 @cli.command(help="Interactively set up ai_helper for tinyget.")

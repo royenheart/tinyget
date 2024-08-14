@@ -6,7 +6,7 @@ from tinyget.interact.process import CommandExecutionError
 from rich.console import Console
 from rich.panel import Panel
 from .pkg_manager import PackageManagerBase
-from ..interact import execute_command as _execute_command, just_execute
+from ..interact import execute_command as _execute_command
 from ..package import Package, ManagerType
 from ..common_utils import logger
 from typing import Optional, Union, List
@@ -97,12 +97,13 @@ def get_unique_id(package_info: dict):
     return uid
 
 
-def repoquery(flags: Union[List[str], str] = []):
+def repoquery(flags: Union[List[str], str] = [], softs: str = ""):
     """
     Query the repository for package information.
 
     Args:
         flags (Union[List[str], str], optional): A list of flags or a single flag as a string. Defaults to [].
+        softs (str): The softwares search pattern
 
     Raises:
         ValueError: If `flags` is neither a string nor a list.
@@ -142,6 +143,8 @@ def repoquery(flags: Union[List[str], str] = []):
     format_string += "|^".join(format_tags)
     format_string += "$$$"
     args = ["repoquery", *flags, "--queryformat", format_string]
+    if softs != "":
+        args.append(softs)
 
     stdout, stderr, retcode = execute_dnf_command(args)
     regex = re.compile(r"\^\^\^(?P<line>.+)\$\$\$")
@@ -196,14 +199,14 @@ def check_update():
     return upgradable
 
 
-def get_all_packages() -> List[Package]:
+def get_packages(softs: str = "") -> List[Package]:
     """
-    Retrieves information about all packages.
+    Retrieves information about specific packages. Default are all packages.
 
     Returns:
         List[Package]: A list of Package objects representing the packages.
     """
-    package_info_list = repoquery()
+    package_info_list = repoquery(softs=softs)
     package_info_dict = {}
     for p in package_info_list:
         uid = get_unique_id(p)
@@ -214,7 +217,7 @@ def get_all_packages() -> List[Package]:
             package_info_dict[uid] = p
 
     # Query installed packages
-    installed_package_info_list = repoquery(flags="--installed")
+    installed_package_info_list = repoquery(flags="--installed", softs=softs)
     for info in installed_package_info_list:
         uid = get_unique_id(info)
         try:
@@ -273,7 +276,7 @@ class DNF(PackageManagerBase):
         """
         console = Console()
         try:
-            package_list = get_all_packages()
+            package_list = get_packages()
         except CommandExecutionError as e:
             console.print(
                 Panel(
@@ -485,8 +488,29 @@ class DNF(PackageManagerBase):
         Returns:
             The return value of the execute_command function.
         """
-        args = ["dnf", "search", package]
-        just_execute(args)
+        console = Console()
+        package_list = []
+        try:
+            package_list = get_packages(softs=f"{package}")
+        except CommandExecutionError as e:
+            console.print(
+                Panel(
+                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            logger.debug(f"{traceback.format_exc()}")
+        except Exception as e:
+            console.print(
+                Panel(
+                    f"{e}",
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            logger.debug(f"{traceback.format_exc()}")
+        return package_list
 
 
 if __name__ == "__main__":
