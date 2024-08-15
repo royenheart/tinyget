@@ -42,7 +42,8 @@ def cli(
     config_path = get_config_path(path=config_path)
     exist_config = get_configuration(path=config_path)
     for k, v in exist_config.items():
-        global_configs[k] = v
+        if v is not None:
+            global_configs[k] = v
     global_configs["live_output"] = live_output
     global_configs["config_path"] = config_path
     if host is not None:
