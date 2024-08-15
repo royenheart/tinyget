@@ -227,6 +227,9 @@ def get_upgradable(package_name: Union[List[str], str] = []) -> Dict[str, str]:
                 f"Packages not in local db, so can't determine upgradable: {stderr}"
             )
             stdout = e.stdout
+        elif stderr == "":
+            logger.debug("No packages found can be upgraded")
+            stdout = e.stdout
         else:
             raise
     regex = re.compile(
@@ -584,6 +587,9 @@ class PACMAN(PackageManagerBase):
                 )
                 package_list.append(pkg)
         except CommandExecutionError as e:
+            if e.stderr == "":
+                logger.debug("Pacman searched nothing")
+                return package_list
             console.print(
                 Panel(
                     _("Output: {}\nError: {}").format(e.stdout, e.stderr),
