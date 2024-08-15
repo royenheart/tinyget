@@ -1,6 +1,7 @@
 import re
 import traceback
 from tinyget.common_utils import logger
+from tinyget.repos.third_party import get_pkg_url, get_third_party_packages
 from tinyget.globals import ERROR_HANDLED, ERROR_UNKNOWN
 from tinyget.interact.process import CommandExecutionError
 from rich.console import Console
@@ -46,9 +47,12 @@ def execute_apt_command(args: List[str], timeout: Optional[float] = None):
         )
 
 
-def get_packages(softs: str = "") -> List[Package]:
+def get_packages(softs: str = "", enable_third_party: bool = True) -> List[Package]:
     """
     Retrieves a list of all installed and uninstalled packages.
+
+    Parameters:
+        enable_third_party (bool): Enable third party softwares.
 
     Returns:
         List[Package]: A list of Package objects representing the installed and uninstalled packages.
@@ -138,6 +142,11 @@ def get_packages(softs: str = "") -> List[Package]:
             )
             packages.append(package)
             continue
+
+    # Append third party softs
+    if enable_third_party:
+        packages.extend(get_third_party_packages(softs, wrapper_softs=packages))
+
     return packages
 
 
@@ -146,7 +155,10 @@ class APT(PackageManagerBase):
         pass
 
     def list_packages(
-        self, only_installed: bool = False, only_upgradable: bool = False
+        self,
+        only_installed: bool = False,
+        only_upgradable: bool = False,
+        enable_third_party: bool = True,
     ) -> List[Package]:
         """
         Returns a list of packages based on the specified filters.
@@ -162,7 +174,7 @@ class APT(PackageManagerBase):
         """
         console = Console()
         try:
-            packages = get_packages()
+            packages = get_packages(enable_third_party=enable_third_party)
         except CommandExecutionError as e:
             console.print(
                 Panel(
@@ -292,6 +304,13 @@ class APT(PackageManagerBase):
         Returns:
             The result of executing the command to install the packages.
         """
+        packages = list(packages)
+        logger.debug(f"Will install packages: {packages}")
+        # replace third party softs' url
+        for i, pkg in enumerate(packages):
+            r = get_pkg_url(softs=pkg)
+            if r is not None:
+                packages[i] = r
         args = ["install", "-y", *packages]
         console = Console()
         try:
@@ -426,12 +445,15 @@ class APT(PackageManagerBase):
             return (None, None, ERROR_UNKNOWN)
         return result
 
-    def search(self, package_name: str):
+    def search(
+        self, package_name: str, enable_third_party: bool = True
+    ) -> List[Package]:
         """
         Searches for the specified package.
 
         Args:
             package_name (str): The name of the package to search for.
+            enable_third_party (bool): Enable third party softs.
 
         Returns:
             The result of executing the command to search for the package.
@@ -439,7 +461,9 @@ class APT(PackageManagerBase):
         console = Console()
         package_list = []
         try:
-            package_list = get_packages(softs=f"{package_name}")
+            package_list = get_packages(
+                softs=f"{package_name}", enable_third_party=enable_third_party
+            )
         except CommandExecutionError as e:
             console.print(
                 Panel(
@@ -461,10 +485,13 @@ class APT(PackageManagerBase):
             logger.debug(f"{traceback.format_exc()}")
         return package_list
 
+    def build(self, folder) -> Optional[str]:
+        raise NotImplementedError
+
 
 if __name__ == "__main__":
     apt = APT()
-    apt.search("vim")
+    apt.search("vim", enable_third_party=False)
 
     # upgradable = 0
     # installed = 0

@@ -1,3 +1,4 @@
+import os
 import re
 import traceback
 from tinyget.common_utils import logger
@@ -5,6 +6,8 @@ from tinyget.globals import ERROR_HANDLED, ERROR_UNKNOWN
 from tinyget.interact.process import CommandExecutionError
 from rich.console import Console
 from rich.panel import Panel
+
+from tinyget.repos.third_party import get_pkg_url, get_third_party_packages
 from .pkg_manager import PackageManagerBase
 from ..interact import execute_command as _execute_command
 from ..package import Package, ManagerType
@@ -39,6 +42,36 @@ def execute_pacman_command(args: List[str], timeout: Optional[float] = None):
         raise CommandExecutionError(
             # 0: args the operation, 1: envp the execution environment
             message=_("Pacman Error during operation {0} with {1}").format(args, envp),
+            args=list(args),
+            envp=envp,
+            stdout=out,
+            stderr=err,
+        )
+
+
+def execute_makepkg_command(
+    args: List[str], timeout: Optional[float] = None, cwd: Optional[str] = None
+):
+    """
+    Executes pacman with the given arguments and optional timeout.
+
+    Parameters:
+        args (List[str]): The arguments to pass to the pacman. Should be a list of strings.
+        timeout (int, optional): The maximum time to wait for the pacman to complete, in seconds. Defaults to None.
+
+    Returns:
+        The result of executing the dnf.
+
+    """
+    envp = {}
+    args.insert(0, "makepkg")
+    out, err, retcode = _execute_command(args, envp, timeout, cwd)
+    if retcode == 0:
+        # Operation successful
+        return (out, err, retcode)
+    else:
+        raise CommandExecutionError(
+            message=f"makepkg command error during operation {args} with {envp}",
             args=list(args),
             envp=envp,
             stdout=out,
@@ -246,9 +279,12 @@ def get_upgradable(package_name: Union[List[str], str] = []) -> Dict[str, str]:
     return upgradable
 
 
-def get_all_packages() -> List[Package]:
+def get_all_packages(enable_third_party: bool = True) -> List[Package]:
     """
     Retrieves information about all packages.
+
+    Parameters:
+        enable_third_party (bool): Enable third party softwares.
 
     Returns:
         List[Package]: A list of Package objects representing the information
@@ -296,6 +332,11 @@ def get_all_packages() -> List[Package]:
             remain=remain,
         )
         packages.append(package)
+
+    # Append third party softs
+    if enable_third_party:
+        packages.extend(get_third_party_packages(wrapper_softs=packages))
+
     return packages
 
 
@@ -303,7 +344,9 @@ class PACMAN(PackageManagerBase):
     def __init__(self):
         pass
 
-    def list_packages(self, only_installed, only_upgradable) -> List[Package]:
+    def list_packages(
+        self, only_installed, only_upgradable, enable_third_party: bool = True
+    ) -> List[Package]:
         """
         Retrieve a list of packages based on filter criteria.
 
@@ -316,7 +359,7 @@ class PACMAN(PackageManagerBase):
         """
         console = Console()
         try:
-            packages = get_all_packages()
+            packages = get_all_packages(enable_third_party=enable_third_party)
         except CommandExecutionError as e:
             console.print(
                 Panel(
@@ -448,6 +491,13 @@ class PACMAN(PackageManagerBase):
         Returns:
             None
         """
+        packages = list(packages)
+        logger.debug(f"Will install packages: {packages}")
+        # replace third party softs' url
+        for i, pkg in enumerate(packages):
+            r = get_pkg_url(softs=pkg)
+            if r is not None:
+                packages[i] = r
         args = ["-S", "--noconfirm", *packages]
         console = Console()
         try:
@@ -588,12 +638,13 @@ class PACMAN(PackageManagerBase):
             return (None, None, ERROR_UNKNOWN)
         return result
 
-    def search(self, package: str):
+    def search(self, package: str, enable_third_party: bool = True) -> List[Package]:
         """
         Searches for a package in the source.
 
         Args:
             package (str): The name of the package to search for.
+            enable_third_party (bool): Enable third party softwares.
 
         Returns:
             The result of the execute_pacman_command function.
@@ -648,6 +699,10 @@ class PACMAN(PackageManagerBase):
                     remain=remain,
                 )
                 package_list.append(pkg)
+
+            # Append third party softs
+            if enable_third_party:
+                package_list.extend(get_third_party_packages(package, package_list))
         except CommandExecutionError as e:
             if e.stderr == "":
                 logger.debug("Pacman searched nothing")
@@ -671,6 +726,46 @@ class PACMAN(PackageManagerBase):
             )
             logger.debug(f"{traceback.format_exc()}")
         return package_list
+
+    def build(self, folder: str) -> Optional[str]:
+        """makepkg wrapper
+
+        Args:
+            folder (str): Specify the folder stores PKGBUILD file
+
+        Returns:
+            Optional[str]: Whether has output, if so, print the output(a package file)
+        """
+        args = ["-s", "--noconfirm"]
+        console = Console()
+        output = None
+        try:
+            out, err, retcode = execute_makepkg_command(args, cwd=folder)
+            # Find pkg.tar.zst
+            files = os.listdir(folder)
+            for f in files:
+                exts = f.split(os.extsep)
+                if len(exts) >= 3 and ".".join(exts[-3:]) == "pkg.tar.zst":
+                    output = os.path.join(folder, f)
+        except CommandExecutionError as e:
+            console.print(
+                Panel(
+                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            logger.debug(f"{traceback.format_exc()}")
+        except Exception as e:
+            console.print(
+                Panel(
+                    f"{e}",
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            logger.debug(f"{traceback.format_exc()}")
+        return output
 
 
 if __name__ == "__main__":

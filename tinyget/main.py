@@ -153,8 +153,15 @@ def search(package: str, count: bool):
     default=1024,
     help="Maximum number of tokens to be generated, default is 1024, can be specified with environment variable OPENAI_MAX_TOKENS, 8192 is openai's max value when using gpt-3.5-turbo",
 )
-def config(host: str, api_key: str, model: str, max_tokens: int):
-    if all([v is not None for v in [host, api_key, model, max_tokens]]):
+@click.option(
+    "--repo-paths",
+    "-R",
+    default=None,
+    multiple=True,
+    help="Specify third-party softwares repo paths, default will be softwares' repo/builtin dir. Can be specified multiple times",
+)
+def config(host: str, api_key: str, model: str, max_tokens: int, repo_path: List[str]):
+    if all([v is not None for v in [host, api_key, model, max_tokens, repo_path]]):
         ai_helper = AIHelper(
             host=host, api_key=api_key, model=model, max_tokens=max_tokens
         )
@@ -178,7 +185,9 @@ def config(host: str, api_key: str, model: str, max_tokens: int):
             click.confirm(
                 "Some configuration is invalid, still want to save?", abort=True
             )
-        set_configuration(path=global_configs["config_path"], conf=ai_helper.config())
+        conf = ai_helper.config()
+        conf["repo_path"] = repo_path
+        set_configuration(path=global_configs["config_path"], conf=conf)  # type: ignore
     else:
         click.confirm(
             "Not all configuration is specified, still want to save?", abort=True
@@ -186,4 +195,6 @@ def config(host: str, api_key: str, model: str, max_tokens: int):
         ai_helper = AIHelper(
             host=host, api_key=api_key, model=model, max_tokens=max_tokens
         )
-        set_configuration(path=global_configs["config_path"], conf=ai_helper.config())
+        conf = ai_helper.config()
+        conf["repo_path"] = repo_path
+        set_configuration(path=global_configs["config_path"], conf=conf)  # type: ignore

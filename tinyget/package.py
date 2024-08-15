@@ -4,7 +4,21 @@ from enum import Enum
 from rich.table import Table
 from rich.console import Console
 
-ManagerType = Enum("ManagerType", "apt dnf pacman")
+
+class ManagerType(Enum):
+    apt = "deb"
+    dnf = "rpm"
+    pacman = "pkg.tar.zst"
+
+    def __eq__(self, value: object) -> bool:
+        return self.name == value
+
+    def __str__(self) -> str:
+        return self.name
+
+    @property
+    def ext(self) -> str:
+        return self.value
 
 
 @dataclass

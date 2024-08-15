@@ -5,6 +5,8 @@ from tinyget.globals import ERROR_HANDLED, ERROR_UNKNOWN
 from tinyget.interact.process import CommandExecutionError
 from rich.console import Console
 from rich.panel import Panel
+
+from tinyget.repos.third_party import get_pkg_url, get_third_party_packages
 from .pkg_manager import PackageManagerBase
 from ..interact import execute_command as _execute_command
 from ..package import Package, ManagerType
@@ -214,9 +216,12 @@ def check_update():
     return upgradable
 
 
-def get_packages(softs: str = "") -> List[Package]:
+def get_packages(softs: str = "", enable_third_party: bool = True) -> List[Package]:
     """
     Retrieves information about specific packages. Default are all packages.
+
+    Parameters:
+        enable_third_party (bool): Enable third party softwares
 
     Returns:
         List[Package]: A list of Package objects representing the packages.
@@ -271,6 +276,11 @@ def get_packages(softs: str = "") -> List[Package]:
             remain={"repo": [info["reponame"]]},
         )
         package_list.append(package)
+
+    # Append third party softs
+    if enable_third_party:
+        package_list.extend(get_third_party_packages(softs, wrapper_softs=package_list))
+
     return package_list
 
 
@@ -278,20 +288,26 @@ class DNF(PackageManagerBase):
     def __init__(self):
         pass
 
-    def list_packages(self, only_installed: bool, only_upgradable: bool):
+    def list_packages(
+        self,
+        only_installed: bool,
+        only_upgradable: bool,
+        enable_third_party: bool = True,
+    ):
         """
         Retrieves a list of packages based on the specified filters.
 
         Args:
             only_installed (bool): If True, only return installed packages.
             only_upgradable (bool): If True, only return upgradable packages.
+            enable_third_party (bool): Enable third party softwares.
 
         Returns:
             List[Package]: A list of packages that match the specified filters.
         """
         console = Console()
         try:
-            package_list = get_packages()
+            package_list = get_packages(enable_third_party=enable_third_party)
         except CommandExecutionError as e:
             console.print(
                 Panel(
@@ -415,6 +431,13 @@ class DNF(PackageManagerBase):
         Returns:
             The return value of the execute_dnf_command function.
         """
+        packages = list(packages)
+        logger.debug(f"Will install packages: {packages}")
+        # replace third party softs' url
+        for i, pkg in enumerate(packages):
+            r = get_pkg_url(softs=pkg)
+            if r is not None:
+                packages[i] = r
         args = ["install", "-y", *packages]
         console = Console()
         try:
@@ -559,12 +582,13 @@ class DNF(PackageManagerBase):
             return (None, None, ERROR_UNKNOWN)
         return result
 
-    def search(self, package: str):
+    def search(self, package: str, enable_third_party: bool = True) -> List[Package]:
         """
         Searches for a package using the DNF package manager.
 
         Parameters:
             package (str): The name of the package to search for.
+            enable_third_party (bool): Enable third party softwares.
 
         Returns:
             The return value of the execute_command function.
@@ -572,7 +596,9 @@ class DNF(PackageManagerBase):
         console = Console()
         package_list = []
         try:
-            package_list = get_packages(softs=f"{package}")
+            package_list = get_packages(
+                softs=f"{package}", enable_third_party=enable_third_party
+            )
         except CommandExecutionError as e:
             console.print(
                 Panel(
@@ -593,6 +619,9 @@ class DNF(PackageManagerBase):
             )
             logger.debug(f"{traceback.format_exc()}")
         return package_list
+
+    def build(self, folder) -> Optional[str]:
+        raise NotImplementedError
 
 
 if __name__ == "__main__":

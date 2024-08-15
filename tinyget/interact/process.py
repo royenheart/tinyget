@@ -75,6 +75,7 @@ class CommandExecutionError(Exception):
 def spawn(
     args: Union[List[str], str],
     envp: dict = {},
+    cwd: Optional[str] = None,
     text: Optional[bool] = None,
     stdoutfd: Optional[int] = None,
     stderrfd: Optional[int] = None,
@@ -106,6 +107,7 @@ def spawn(
         close_fds=True,
         env=orig_envp,
         bufsize=0,
+        cwd=cwd,
         shell=isinstance(args, str),
         text=text,
     )
@@ -139,6 +141,7 @@ def execute_command(
     args: Union[List[str], str],
     envp: dict = {},
     timeout: Optional[float] = None,
+    cwd: Optional[str] = None,
     realtime_output=False,
 ):
     """
@@ -168,6 +171,7 @@ def execute_command(
         p = spawn(
             args,
             envp,
+            cwd,
             text=True,
             stdoutfd=slave_fd,
             stdinfd=slave_fd,
@@ -181,7 +185,7 @@ def execute_command(
         poutput = "".join(output_list)
         return poutput, pstderr, pretcode
     else:
-        p = spawn(args, envp)
+        p = spawn(args, envp, cwd)
         stdout, stderr = p.communicate(input=None, timeout=timeout)
         return stdout.decode(), stderr.decode(), p.returncode
 
