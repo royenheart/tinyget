@@ -299,7 +299,7 @@ class AIHelper:
 
 def try_to_get_ai_helper():
     configs = get_configuration_with_environ(
-        path=global_configs.get("config_path"),
+        path=global_configs.get("config_path"),  # type: ignore
         key_environ={
             "host": "OPENAI_API_HOST",
             "api_key": "OPENAI_API_KEY",
