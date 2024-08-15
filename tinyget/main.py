@@ -124,8 +124,8 @@ def search(package: str, count: bool):
     if count:
         click.echo(f"{len(packages)} packages in total.")
     else:
-        for package in packages:
-            click.echo(package)
+        for pkg in packages:
+            click.echo(pkg)
 
 
 @cli.command(help="Interactively set up ai_helper for tinyget.")
