@@ -1,3 +1,4 @@
+from datetime import datetime
 import re
 import traceback
 
@@ -9,7 +10,7 @@ from rich.panel import Panel
 from tinyget.repos.third_party import get_pkg_url, get_third_party_packages
 from .pkg_manager import PackageManagerBase
 from ..interact import execute_command as _execute_command
-from ..package import Package, ManagerType
+from ..package import History, Package, ManagerType
 from ..common_utils import logger
 from typing import Optional, Union, List
 from tinyget.i18n import load_translation
@@ -621,6 +622,63 @@ class DNF(PackageManagerBase):
         return package_list
 
     def build(self, folder) -> Optional[str]:
+        raise NotImplementedError
+
+    def history(self) -> List[History]:
+        console = Console()
+        args = ["history"]
+        histories: List[History] = []
+        try:
+            out, err, retcode = execute_dnf_command(args)
+            out = out.strip()
+            for l in out.splitlines()[2:]:
+                blocks = l.split("|")
+                his = History(
+                    id=blocks[0].strip(),
+                    command=blocks[1].strip(),
+                    date=datetime.strptime(blocks[2].strip(), "%Y-%m-%d %H:%M"),
+                    operations=[x.strip() for x in blocks[3].split(",")],
+                )
+                histories.append(his)
+        except CommandExecutionError as e:
+            console.print(
+                Panel(
+                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            logger.debug(f"{traceback.format_exc()}")
+        return histories
+
+    def rollback(self, id: str):
+        console = Console()
+        args = ["history", "undo", id, "-y"]
+        try:
+            result = execute_dnf_command(args)
+        except CommandExecutionError as e:
+            console.print(
+                Panel(
+                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            logger.debug(f"{traceback.format_exc()}")
+            return (None, None, ERROR_HANDLED)
+        except Exception as e:
+            console.print(
+                Panel(
+                    f"{e}",
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            logger.debug(f"{traceback.format_exc()}")
+            return (None, None, ERROR_UNKNOWN)
+        return result
+
+    def repo_manager(self):
         raise NotImplementedError
 
 

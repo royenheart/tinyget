@@ -128,6 +128,21 @@ def search(package: str, count: bool):
             click.echo(pkg)
 
 
+@cli.command("history", help="check history")
+def history():
+    package_manager = PackageManager()
+    histories = package_manager.history()
+    for his in histories:
+        click.echo(his)
+
+
+@cli.command("rollback", help="rollback to specified history")
+@click.argument("id", nargs=1, required=True)
+def rollback(id: str):
+    package_manager = PackageManager()
+    package_manager.rollback(id=id)
+
+
 @cli.command(help="Interactively set up ai_helper for tinyget.")
 @click.option(
     "--host",

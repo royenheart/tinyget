@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import re
 import traceback
@@ -10,7 +11,7 @@ from rich.panel import Panel
 from tinyget.repos.third_party import get_pkg_url, get_third_party_packages
 from .pkg_manager import PackageManagerBase
 from ..interact import execute_command as _execute_command
-from ..package import Package, ManagerType
+from ..package import Package, ManagerType, History
 from typing import Optional, Union, List, Dict
 from tinyget.i18n import load_translation
 from tinyget.interact import try_to_get_ai_helper
@@ -77,6 +78,25 @@ def execute_makepkg_command(
             stdout=out,
             stderr=err,
         )
+
+
+def judge_pacman_opts(opt: str):
+    if "-S" in opt or "--sync" in opt:
+        return "Sync"
+    elif "-Q" in opt or "--query" in opt:
+        return "Query"
+    elif "-D" in opt or "--database" in opt:
+        return "Database"
+    elif "-F" in opt or "--files" in opt:
+        return "Files"
+    elif "-R" in opt or "--remove" in opt:
+        return "Remove"
+    elif "-T" in opt or "--deptest" in opt:
+        return "Deptest"
+    elif "-U" in opt or "--upgrade" in opt:
+        return "Upgrade"
+    else:
+        return "Unknown"
 
 
 def get_installed_info(package_name: Union[List[str], str]) -> List[dict]:
@@ -766,6 +786,50 @@ class PACMAN(PackageManagerBase):
             )
             logger.debug(f"{traceback.format_exc()}")
         return output
+
+    def history(self) -> List[History]:
+        console = Console()
+        histories = []
+        try:
+            with open("/var/log/pacman.log", "r") as f:
+                out = f.read()
+            out = out.strip().splitlines()
+            out = [block for block in out if block != ""]
+            i = -1
+            for line in out:
+                blocks = line.split(" ", maxsplit=2)
+                cmdregx = r"Running '(.+)'"
+                if blocks[1].strip() != "[PACMAN]":
+                    continue
+                rematch = re.match(cmdregx, blocks[2].strip())
+                if rematch is None:
+                    continue
+                i += 1
+                command = rematch.groups()[0]
+                operations = [judge_pacman_opts(command.split(" ", maxsplit=2)[1])]
+                his = History(
+                    id=str(i),
+                    command=command,
+                    date=datetime.strptime(blocks[0].strip(), "[%Y-%m-%dT%H:%M:%S%z]"),
+                    operations=operations,
+                )
+                histories.append(his)
+        except Exception as e:
+            console.print(
+                Panel(
+                    f"{e}",
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            logger.debug(f"{traceback.format_exc()}")
+        return histories
+
+    def rollback(self, id: str):
+        raise NotImplementedError
+
+    def repo_manager(self):
+        raise NotImplementedError
 
 
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import List, Optional
 from enum import Enum
 from rich.table import Table
@@ -19,6 +20,17 @@ class ManagerType(Enum):
     @property
     def ext(self) -> str:
         return self.value
+
+
+@dataclass
+class History:
+    id: str = field(default_factory=str)
+    command: str = field(default_factory=str)
+    date: datetime = field(default_factory=datetime.now)
+    operations: List[str] = field(default_factory=List[str])
+
+    def __repr__(self):
+        return f"{self.id} | {self.command} | {self.date} | {self.operations} |"
 
 
 @dataclass

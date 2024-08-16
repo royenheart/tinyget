@@ -1,5 +1,5 @@
 from typing import List, Optional
-from ..package import Package
+from ..package import History, Package
 
 
 class PackageManagerBase:
@@ -22,6 +22,15 @@ class PackageManagerBase:
         raise NotImplementedError
 
     def build(self, folder) -> Optional[str]:
+        raise NotImplementedError
+
+    def history(self) -> List[History]:
+        raise NotImplementedError
+
+    def rollback(self, id):
+        raise NotImplementedError
+
+    def repo_manager(self):
         raise NotImplementedError
 
     def get_package(self, package_name: str) -> Package:

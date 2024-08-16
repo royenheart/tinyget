@@ -1,3 +1,4 @@
+from datetime import datetime
 import re
 import traceback
 from tinyget.common_utils import logger
@@ -8,7 +9,7 @@ from rich.console import Console
 from rich.panel import Panel
 from .pkg_manager import PackageManagerBase
 from ..interact import execute_command as _execute_command
-from tinyget.package import Package, ManagerType
+from tinyget.package import History, Package, ManagerType
 from typing import Optional, List
 from tinyget.i18n import load_translation
 from tinyget.interact import try_to_get_ai_helper
@@ -486,6 +487,42 @@ class APT(PackageManagerBase):
         return package_list
 
     def build(self, folder) -> Optional[str]:
+        raise NotImplementedError
+
+    def history(self) -> List[History]:
+        console = Console()
+        histories = []
+        try:
+            with open("/var/log/apt/history.log", "r") as f:
+                out = f.read()
+            out = out.strip().split("\n\n")
+            out = [block for block in out if block != ""]
+            for i, l in enumerate(out):
+                blocks = l.splitlines()
+                his = History(
+                    id=str(i),
+                    command=blocks[1].split(":")[1].strip(),
+                    date=datetime.strptime(
+                        blocks[0].split(":", maxsplit=1)[1].strip(), "%Y-%m-%d %H:%M:%S"
+                    ),
+                    operations=[blocks[2].split(":")[0]],
+                )
+                histories.append(his)
+        except Exception as e:
+            console.print(
+                Panel(
+                    f"{e}",
+                    border_style="red",
+                    title="Operation Failed",
+                )
+            )
+            logger.debug(f"{traceback.format_exc()}")
+        return histories
+
+    def rollback(self, id: str):
+        raise NotImplementedError
+
+    def repo_manager(self):
         raise NotImplementedError
 
 
