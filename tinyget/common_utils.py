@@ -59,6 +59,35 @@ def setup_logger(debug: bool):
         )
 
 
+def setup_logger_level(level: str):
+    logging.basicConfig(
+        level=str_to_log_level(level),
+        format="%(asctime)s %(levelname)s - %(name)s: %(message)s",
+    )
+
+
+def str_to_log_level(level: str):
+    level = level.upper()
+    if level == "CRITICAL":
+        return logging.CRITICAL
+    elif level == "FATAL":
+        return logging.FATAL
+    elif level == "ERROR":
+        return logging.ERROR
+    elif level == "WARNING":
+        return logging.WARNING
+    elif level == "WARN":
+        return logging.WARN
+    elif level == "INFO":
+        return logging.INFO
+    elif level == "DEBUG":
+        return logging.DEBUG
+    elif level == "NOTSET":
+        return logging.NOTSET
+    else:
+        return logging.INFO
+
+
 @contextmanager
 def impersonate(
     username=os.environ.get("SUDO_USER"), config_path: Optional[str] = None
