@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tinyget"
-dynamic = ["version", "dependencies"]
+dynamic = ["version", "dependencies", "scripts"]
 requires-python = ">=3.6"
 authors = [
     { name = "kongjiadongyuan", email = "zhaggbl@outlook.com" },
@@ -28,9 +28,6 @@ dev = ["build", "black", "flake8", "hatchling", "pytest"]
 Documentation = "https://gitee.com/tinylab/tinyget#readme"
 Issues = "https://gitee.com/tinylab/tinyget/issues"
 Source = "https://gitee.com/tinylab/tinyget"
-
-[project.scripts]
-tinyget = "tinyget.main:cli"
 
 [tool.hatch.version]
 path = "tinyget/__about__.py"

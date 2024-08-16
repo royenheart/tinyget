@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import List, Dict, Optional, Union
 import click
 import pwd
@@ -11,7 +12,7 @@ from .globals import global_configs
 
 def get_os_package_manager(possible_package_manager_names: List[str]):
     """
-    Returns the first supported package manager found in the system's PATH environment variable.
+    Returns the supported package manager in current system.
 
     Parameters:
         possible_package_manager_names (List[str]): A list of possible package manager names to search for.
@@ -20,17 +21,27 @@ def get_os_package_manager(possible_package_manager_names: List[str]):
         str: The name of the first supported package manager found in the system's PATH environment variable.
 
     Raises:
-        Exception: If no supported package manager is found in the system's PATH environment variable.
+        Exception: If no supported package manager is found.
     """
-    paths = os.environ["PATH"].split(os.pathsep)
-    for bin_path in paths:
-        for package_manager_name in possible_package_manager_names:
-            try:
-                if package_manager_name in os.listdir(bin_path):
-                    return package_manager_name
-            except FileNotFoundError as e:
-                continue
-    raise Exception("No supported package manager found in PATH")
+    judges = Enum("Judges", "file folder")
+    os_info = {
+        "dnf": [(judges.file, "/etc/redhat-release")],
+        "pacman": [(judges.file, "/etc/arch-release")],
+        "emerge": [(judges.file, "/etc/gentoo-release")],
+        "zypp": [(judges.file, "/etc/SuSE-release")],
+        "apt": [(judges.file, "/etc/debian_version")],
+        "apk": [(judges.file, "/etc/alpine-release")],
+    }
+
+    for possible_m in possible_package_manager_names:
+        for checks in os_info[possible_m]:
+            t = checks[0]
+            f = checks[1]
+            if (t is judges.file and os.path.isfile(f)) or (
+                t is judges.folder and os.path.isdir(f)
+            ):
+                return possible_m
+    raise Exception("No supported package manager found")
 
 
 def get_path_parts(path: str):
