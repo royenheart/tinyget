@@ -1,6 +1,7 @@
 all: clean lint build pre-test uninstall install post-test
 
 NO_LINT ?= OFF
+NO_TEST ?= OFF
 
 build:
 	python -m build --wheel
@@ -20,11 +21,15 @@ uninstall:
 
 .PHONY: pre-test
 pre-test:
-	PYTHONPATH=. pytest -k 'not test_cli'
+ifeq ($(NO_TEST),OFF)
+	bash -c "export PATH=$(PATH);PYTHONPATH=. pytest -k 'not test_cli'"
+endif
 
 .PHONY: post-test
 post-test:
-	pytest -k 'test_cli'
+ifeq ($(NO_TEST),OFF)
+	bash -c "export PATH=$(PATH);pytest -k 'test_cli'"
+endif
 
 lint:
 ifeq ($(NO_LINT),OFF)
