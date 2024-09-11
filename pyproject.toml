@@ -48,6 +48,5 @@ exclude = '''
 # in the root of the project.
 (
   ^__about__.py     # exclude a file named foo.py in the root of the project
-  | tinyget/wrappers/deprecated
 )
 '''
