@@ -7,7 +7,7 @@ from rich.console import Console
 from rich.panel import Panel
 from .pkg_manager import PackageManagerBase
 from ..interact import execute_command as _execute_command
-from ..package import Package, ManagerType
+from tinyget.package import Package, ManagerType
 from typing import Optional, List
 from tinyget.interact import try_to_get_ai_helper
 
@@ -129,7 +129,7 @@ class APT(PackageManagerBase):
 
     def list_packages(
         self, only_installed: bool = False, only_upgradable: bool = False
-    ):
+    ) -> List[Package]:
         """
         Returns a list of packages based on the specified filters.
 
@@ -154,13 +154,19 @@ class APT(PackageManagerBase):
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
+            return []
         except Exception as e:
             console.print(Panel(f"{e}", border_style="red", title="Operation Failed"))
             logger.debug(f"{traceback.format_exc()}")
+            return []
+
+        # Process filter
         if only_upgradable:
             packages = [package for package in packages if package.upgradable]
+
         if only_installed:
             packages = [package for package in packages if package.installed]
+
         return packages
 
     def update(self):

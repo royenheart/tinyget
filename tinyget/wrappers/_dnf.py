@@ -286,6 +286,7 @@ class DNF(PackageManagerBase):
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
+            return []
         except Exception as e:
             console.print(
                 Panel(
@@ -295,11 +296,15 @@ class DNF(PackageManagerBase):
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
+            return []
+
         # Process filter
         if only_installed:
             package_list = [p for p in package_list if p.installed]
+
         if only_upgradable:
             package_list = [p for p in package_list if p.upgradable]
+
         return package_list
 
     def update(self):

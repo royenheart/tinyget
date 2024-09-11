@@ -320,9 +320,12 @@ class PACMAN(PackageManagerBase):
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
+            return []
         except Exception as e:
             console.print(Panel(f"{e}", border_style="red", title="Operation Failed"))
             logger.debug(f"{traceback.format_exc()}")
+            return []
+
         # Process filter
         if only_installed:
             packages = [package for package in packages if package.installed]
