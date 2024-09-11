@@ -1,4 +1,4 @@
-all: clean lint build pre-test uninstall install post-test
+all: clean lint build uninstall pre-test install post-test
 
 NO_LINT ?= OFF
 NO_TEST ?= OFF
