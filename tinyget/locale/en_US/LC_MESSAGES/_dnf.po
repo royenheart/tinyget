@@ -1,0 +1,74 @@
+# English translations for tinyget package.
+# Copyright (C) 2024 THE tinyget'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the tinyget package.
+# Pasationous RoyenHeart <royenheart@outlook.com>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: tinyget _dnf\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-09-12 08:30+0800\n"
+"PO-Revision-Date: 2024-09-12 08:37+0800\n"
+"Last-Translator: Pasationous RoyenHeart <royenheart@outlook.com>\n"
+"Language-Team: English\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../wrappers/_dnf.py:43
+msgid "An error occurred when executing {} with {}, was handled by dnf"
+msgstr "An error occurred when executing {} with {}, was handled by dnf"
+
+#: ../wrappers/_dnf.py:53
+msgid "An unknown unhandled error occurred during operation {} with {}"
+msgstr "An unknown unhandled error occurred during operation {} with {}"
+
+#: ../wrappers/_dnf.py:66
+msgid ""
+"Problem with acquiring or releasing of locks raised during operation {} with "
+"{}"
+msgstr ""
+"Problem with acquiring or releasing of locks raised during operation {} with "
+"{}"
+
+#: ../wrappers/_dnf.py:75
+msgid "Unknown dnf error during operation {} with {}"
+msgstr "Unknown dnf error during operation {} with {}"
+
+#: ../wrappers/_dnf.py:151
+msgid "flags must be a string or a list"
+msgstr "flags must be a string or a list"
+
+#: ../wrappers/_dnf.py:294 ../wrappers/_dnf.py:334 ../wrappers/_dnf.py:366
+#: ../wrappers/_dnf.py:402 ../wrappers/_dnf.py:462 ../wrappers/_dnf.py:522
+msgid ""
+"Output: {}\n"
+"Error: {}"
+msgstr ""
+"Output: {}\n"
+"Error: {}"
+
+#: ../wrappers/_dnf.py:296 ../wrappers/_dnf.py:306 ../wrappers/_dnf.py:336
+#: ../wrappers/_dnf.py:346 ../wrappers/_dnf.py:368 ../wrappers/_dnf.py:378
+#: ../wrappers/_dnf.py:404 ../wrappers/_dnf.py:438 ../wrappers/_dnf.py:464
+#: ../wrappers/_dnf.py:498 ../wrappers/_dnf.py:524 ../wrappers/_dnf.py:533
+msgid "Operation Failed"
+msgstr "Operation Failed"
+
+#: ../wrappers/_dnf.py:412 ../wrappers/_dnf.py:472
+msgid ""
+"AI Helper not started, will enabled after configured by 'tinyget "
+"config'/'tinyget ui'"
+msgstr ""
+"AI Helper not started, will enabled after configured by 'tinyget "
+"config'/'tinyget ui'"
+
+#: ../wrappers/_dnf.py:420 ../wrappers/_dnf.py:480
+msgid "AI Helper started, getting command advise"
+msgstr "AI Helper started, getting command advise"
+
+#: ../wrappers/_dnf.py:429 ../wrappers/_dnf.py:489
+msgid "Advise from AI Helper"
+msgstr "Advise from AI Helper"

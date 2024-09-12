@@ -1,4 +1,8 @@
-global_configs = {}
+import os
+
+DEFAULT_LOCALE_DIR = os.path.join(os.path.dirname(__file__), "locale")
+
+global_configs = {"LOCALE_DIR": DEFAULT_LOCALE_DIR}
 
 # tinyget retcode
 SUCCESS = 0

@@ -1,0 +1,72 @@
+# Chinese translations for tinyget package
+# tinyget 软件包的简体中文翻译.
+# Copyright (C) 2024 THE tinyget'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the tinyget package.
+# Pasationous RoyenHeart <royenheart@outlook.com>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: tinyget _dnf\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-09-12 08:30+0800\n"
+"PO-Revision-Date: 2024-09-12 08:39+0800\n"
+"Last-Translator: Pasationous RoyenHeart <royenheart@outlook.com>\n"
+"Language-Team: Chinese (simplified)\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../wrappers/_dnf.py:43
+msgid "An error occurred when executing {} with {}, was handled by dnf"
+msgstr "当前执行 {} 时发生错误 {}，已由 dnf 处理"
+
+#: ../wrappers/_dnf.py:53
+msgid "An unknown unhandled error occurred during operation {} with {}"
+msgstr "当前执行 {} 时发生未知的未处理错误 {}"
+
+#: ../wrappers/_dnf.py:66
+msgid ""
+"Problem with acquiring or releasing of locks raised during operation {} with "
+"{}"
+msgstr ""
+"当前执行 {} 时发生锁问题（dnf 获取或释放锁时） {}"
+
+#: ../wrappers/_dnf.py:75
+msgid "Unknown dnf error during operation {} with {}"
+msgstr "当前执行 {} 时发生未知的 dnf 错误 {}"
+
+#: ../wrappers/_dnf.py:151
+msgid "flags must be a string or a list"
+msgstr "标志必须是字符串或列表"
+
+#: ../wrappers/_dnf.py:294 ../wrappers/_dnf.py:334 ../wrappers/_dnf.py:366
+#: ../wrappers/_dnf.py:402 ../wrappers/_dnf.py:462 ../wrappers/_dnf.py:522
+msgid ""
+"Output: {}\n"
+"Error: {}"
+msgstr ""
+"输出：{}\n"
+"错误：{}"
+
+#: ../wrappers/_dnf.py:296 ../wrappers/_dnf.py:306 ../wrappers/_dnf.py:336
+#: ../wrappers/_dnf.py:346 ../wrappers/_dnf.py:368 ../wrappers/_dnf.py:378
+#: ../wrappers/_dnf.py:404 ../wrappers/_dnf.py:438 ../wrappers/_dnf.py:464
+#: ../wrappers/_dnf.py:498 ../wrappers/_dnf.py:524 ../wrappers/_dnf.py:533
+msgid "Operation Failed"
+msgstr "操作失败"
+
+#: ../wrappers/_dnf.py:412 ../wrappers/_dnf.py:472
+msgid ""
+"AI Helper not started, will enabled after configured by 'tinyget "
+"config'/'tinyget ui'"
+msgstr ""
+"AI 助手未启动，在使用 'tinyget config' 或 'tinyget ui' 配置完成后启用"
+
+#: ../wrappers/_dnf.py:420 ../wrappers/_dnf.py:480
+msgid "AI Helper started, getting command advise"
+msgstr "AI 助手启动，正在获取命令帮助中"
+
+#: ../wrappers/_dnf.py:429 ../wrappers/_dnf.py:489
+msgid "Advise from AI Helper"
+msgstr "AI 助手提示"

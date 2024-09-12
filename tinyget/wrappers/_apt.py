@@ -9,9 +9,12 @@ from .pkg_manager import PackageManagerBase
 from ..interact import execute_command as _execute_command
 from tinyget.package import Package, ManagerType
 from typing import Optional, List
+from tinyget.i18n import load_translation
 from tinyget.interact import try_to_get_ai_helper
 
 aihelper = try_to_get_ai_helper()
+
+_ = load_translation("_apt")
 
 
 def execute_apt_command(args: List[str], timeout: Optional[float] = None):
@@ -34,7 +37,7 @@ def execute_apt_command(args: List[str], timeout: Optional[float] = None):
         return (out, err, retcode)
     else:
         raise CommandExecutionError(
-            message=f"APT error during operation {args} with {envp}",
+            message=_("APT error during operation {} with {}").format(args, envp),
             args=list(args),
             envp=envp,
             stdout=out,
@@ -75,26 +78,39 @@ def get_packages(softs: str = "") -> List[Package]:
     for block in blocks:
         match = installed_regex.search(block)
         if match:
-            installed_status = match.group("install_status").split(",")
+            installed_status = match.group("install_status").split(_(","))
             installed = False
             automatically_installed = False
             upgradable = False
             available_version = None
             for status in installed_status:
-                if "installed" in status:
+                if _("installed") in status:
                     installed = True
-                if "auto" in status:
+                if _("auto") in status:
                     automatically_installed = True
-                if "upgradable" in status:
+                if _("upgradable") in status:
                     upgradable = True
                     installed = True
-                    available_version = status[: -len("upgradable from: ")]
+                    # upgradable from: xxx, which is the current version
+                    # : 's format depends on the LANG
+                    cv = status.split(_(":"), maxsplit=1)
+                    if len(cv) == 2:
+                        available_version = cv[1].strip()
+                    else:
+                        logger.warning(
+                            _("Can't parse status is upgradable: {}").format(status)
+                        )
+            version = match.group("version")
+            if upgradable:
+                t = version
+                version = available_version if available_version is not None else ""
+                available_version = t
             package = Package(
                 package_type=ManagerType.apt,
                 package_name=match.group("package_name"),
                 architecture=match.group("architecture"),
                 description=match.group("description"),
-                version=match.group("version"),
+                version=version,
                 installed=installed,
                 automatically_installed=automatically_installed,
                 upgradable=upgradable,
@@ -148,15 +164,17 @@ class APT(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
             return []
         except Exception as e:
-            console.print(Panel(f"{e}", border_style="red", title="Operation Failed"))
+            console.print(
+                Panel(f"{e}", border_style="red", title=_("Operation Failed"))
+            )
             logger.debug(f"{traceback.format_exc()}")
             return []
 
@@ -182,9 +200,9 @@ class APT(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
@@ -194,7 +212,7 @@ class APT(PackageManagerBase):
                 Panel(
                     f"{e}",
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
@@ -218,9 +236,9 @@ class APT(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
@@ -230,7 +248,7 @@ class APT(PackageManagerBase):
                 Panel(
                     f"{e}",
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
@@ -254,22 +272,26 @@ class APT(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
             if aihelper is None:
                 console.print(
                     Panel(
-                        "AI Helper not started, will enabled after configured by 'tinyget config'/'tinyget ui'",
+                        _(
+                            "AI Helper not started, will enabled after configured by 'tinyget config'/'tinyget ui'"
+                        ),
                         border_style="bright_black",
                     )
                 )
             else:
                 with console.status(
-                    "[bold green] AI Helper started, getting command advise",
+                    "[bold green] {}".format(
+                        _("AI Helper started, getting command advise")
+                    ),
                     spinner="bouncingBar",
                 ) as status:
                     recommendation = aihelper.fix_command(args, e.stdout, e.stderr)
@@ -277,7 +299,7 @@ class APT(PackageManagerBase):
                     Panel(
                         recommendation,
                         border_style="green",
-                        title="Advise from AI Helper",
+                        title=_("Advise from AI Helper"),
                     )
                 )
             return (None, None, ERROR_HANDLED)
@@ -286,7 +308,7 @@ class APT(PackageManagerBase):
                 Panel(
                     f"{e}",
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
@@ -310,22 +332,26 @@ class APT(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
             if aihelper is None:
                 console.print(
                     Panel(
-                        "AI Helper not started, will enabled after configured by 'tinyget config'/'tinyget ui'",
+                        _(
+                            "AI Helper not started, will enabled after configured by 'tinyget config'/'tinyget ui'"
+                        ),
                         border_style="bright_black",
                     )
                 )
             else:
                 with console.status(
-                    "[bold green] AI Helper started, getting command advise",
+                    "[bold green] {}".format(
+                        _("AI Helper started, getting command advise")
+                    ),
                     spinner="bouncingBar",
                 ) as status:
                     recommendation = aihelper.fix_command(args, e.stdout, e.stderr)
@@ -333,7 +359,7 @@ class APT(PackageManagerBase):
                     Panel(
                         recommendation,
                         border_style="green",
-                        title="Advise from AI Helper",
+                        title=_("Advise from AI Helper"),
                     )
                 )
             return (None, None, ERROR_HANDLED)
@@ -342,7 +368,7 @@ class APT(PackageManagerBase):
                 Panel(
                     f"{e}",
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
@@ -366,9 +392,9 @@ class APT(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
@@ -377,7 +403,7 @@ class APT(PackageManagerBase):
                 Panel(
                     f"{e}",
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")

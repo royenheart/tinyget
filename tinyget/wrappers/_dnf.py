@@ -10,9 +10,12 @@ from ..interact import execute_command as _execute_command
 from ..package import Package, ManagerType
 from ..common_utils import logger
 from typing import Optional, Union, List
+from tinyget.i18n import load_translation
 from tinyget.interact import try_to_get_ai_helper
 
 aihelper = try_to_get_ai_helper()
+
+_ = load_translation("_dnf")
 
 
 def execute_dnf_command(args: List[str], timeout: Optional[float] = None):
@@ -36,7 +39,9 @@ def execute_dnf_command(args: List[str], timeout: Optional[float] = None):
         return (out, err, retcode)
     elif retcode == 1:
         raise CommandExecutionError(
-            message=f"An error occurred when executing {args} with {envp}, was handled by dnf",
+            message=_(
+                "An error occurred when executing {} with {}, was handled by dnf"
+            ).format(args, envp),
             args=list(args),
             envp=envp,
             stdout=out,
@@ -44,7 +49,9 @@ def execute_dnf_command(args: List[str], timeout: Optional[float] = None):
         )
     elif retcode == 3:
         raise CommandExecutionError(
-            message=f"An unknown unhandled error occurred during operation {args} with {envp}",
+            message=_(
+                "An unknown unhandled error occurred during operation {} with {}"
+            ).format(args, envp),
             args=list(args),
             envp=envp,
             stdout=out,
@@ -55,7 +62,9 @@ def execute_dnf_command(args: List[str], timeout: Optional[float] = None):
         return (out, err, retcode)
     elif retcode == 200:
         raise CommandExecutionError(
-            message=f"Problem with acquiring or releasing of locks raised during operation {args} with {envp}",
+            message=_(
+                "Problem with acquiring or releasing of locks raised during operation {} with {}"
+            ).format(args, envp),
             args=list(args),
             envp=envp,
             stdout=out,
@@ -63,7 +72,9 @@ def execute_dnf_command(args: List[str], timeout: Optional[float] = None):
         )
     else:
         raise CommandExecutionError(
-            message=f"Unknown dnf error during operation {args} with {envp}",
+            message=_("Unknown dnf error during operation {} with {}").format(
+                args, envp
+            ),
             args=list(args),
             envp=envp,
             stdout=out,
@@ -137,7 +148,7 @@ def repoquery(flags: Union[List[str], str] = [], softs: str = ""):
     elif isinstance(flags, list):
         pass
     else:
-        raise ValueError("flags must be a string or a list")
+        raise ValueError(_("flags must be a string or a list"))
     format_tags = [f"%{{{tag}}}" for tag in query_tags]
     format_string = "^^^"
     format_string += "|^".join(format_tags)
@@ -280,9 +291,9 @@ class DNF(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
@@ -292,7 +303,7 @@ class DNF(PackageManagerBase):
                 Panel(
                     f"{e}",
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
@@ -320,9 +331,9 @@ class DNF(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
@@ -332,7 +343,7 @@ class DNF(PackageManagerBase):
                 Panel(
                     f"{e}",
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
@@ -352,9 +363,9 @@ class DNF(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
@@ -364,7 +375,7 @@ class DNF(PackageManagerBase):
                 Panel(
                     f"{e}",
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
@@ -388,22 +399,26 @@ class DNF(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
             if aihelper is None:
                 console.print(
                     Panel(
-                        "AI Helper not started, will enabled after configured by 'tinyget config'/'tinyget ui'",
+                        _(
+                            "AI Helper not started, will enabled after configured by 'tinyget config'/'tinyget ui'"
+                        ),
                         border_style="bright_black",
                     )
                 )
             else:
                 with console.status(
-                    "[bold green] AI Helper started, getting command advise",
+                    "[bold green] {}".format(
+                        _("AI Helper started, getting command advise")
+                    ),
                     spinner="bouncingBar",
                 ) as status:
                     recommendation = aihelper.fix_command(args, e.stdout, e.stderr)
@@ -411,7 +426,7 @@ class DNF(PackageManagerBase):
                     Panel(
                         recommendation,
                         border_style="green",
-                        title="Advise from AI Helper",
+                        title=_("Advise from AI Helper"),
                     )
                 )
             return (None, None, ERROR_HANDLED)
@@ -420,7 +435,7 @@ class DNF(PackageManagerBase):
                 Panel(
                     f"{e}",
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
@@ -444,22 +459,26 @@ class DNF(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
             if aihelper is None:
                 console.print(
                     Panel(
-                        "AI Helper not started, will enabled after configured by 'tinyget config'/'tinyget ui'",
+                        _(
+                            "AI Helper not started, will enabled after configured by 'tinyget config'/'tinyget ui'"
+                        ),
                         border_style="bright_black",
                     )
                 )
             else:
                 with console.status(
-                    "[bold green] AI Helper started, getting command advise",
+                    "[bold green] {}".format(
+                        _("AI Helper started, getting command advise")
+                    ),
                     spinner="bouncingBar",
                 ) as status:
                     recommendation = aihelper.fix_command(args, e.stdout, e.stderr)
@@ -467,7 +486,7 @@ class DNF(PackageManagerBase):
                     Panel(
                         recommendation,
                         border_style="green",
-                        title="Advise from AI Helper",
+                        title=_("Advise from AI Helper"),
                     )
                 )
             return (None, None, ERROR_HANDLED)
@@ -476,7 +495,7 @@ class DNF(PackageManagerBase):
                 Panel(
                     f"{e}",
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
@@ -500,9 +519,9 @@ class DNF(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
@@ -511,7 +530,7 @@ class DNF(PackageManagerBase):
                 Panel(
                     f"{e}",
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")

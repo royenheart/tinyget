@@ -9,10 +9,12 @@ from .pkg_manager import PackageManagerBase
 from ..interact import execute_command as _execute_command
 from ..package import Package, ManagerType
 from typing import Optional, Union, List, Dict
-
+from tinyget.i18n import load_translation
 from tinyget.interact import try_to_get_ai_helper
 
 aihelper = try_to_get_ai_helper()
+
+_ = load_translation("_pacman")
 
 
 def execute_pacman_command(args: List[str], timeout: Optional[float] = None):
@@ -35,7 +37,7 @@ def execute_pacman_command(args: List[str], timeout: Optional[float] = None):
         return (out, err, retcode)
     else:
         raise CommandExecutionError(
-            message=f"Pacman Error during operation {args} with {envp}",
+            message=_("Pacman Error during operation {} with {}").format(args, envp),
             args=list(args),
             envp=envp,
             stdout=out,
@@ -69,13 +71,13 @@ def get_installed_info(package_name: Union[List[str], str]) -> List[dict]:
     elif isinstance(package_name, list):
         package_name_list = package_name
     else:
-        raise ValueError("package_name must be a string or a list of strings")
+        raise ValueError(_("package_name must be a string or a list of strings"))
     args = ["-Qi", "--noconfirm", *package_name_list]
     try:
         stdout, stderr, retcode = execute_pacman_command(args)
     except CommandExecutionError as e:
         stderr = e.stderr
-        if "was not found" in stderr and "error" in stderr:
+        if _("was not found") in stderr and _("error") in stderr:
             logger.debug(f"Packages not found in local db: {stderr}")
             stdout = e.stdout
         else:
@@ -87,15 +89,15 @@ def get_installed_info(package_name: Union[List[str], str]) -> List[dict]:
         info = {}
         lines = block.split("\n")
         for line in lines:
-            if line.startswith("Name"):
+            if line.startswith(_("Name")):
                 info["name"] = line[line.find(":") + 1 :].strip()
-            if line.startswith("Version"):
+            if line.startswith(_("Version")):
                 info["version"] = line[line.find(":") + 1 :].strip()
-            if line.startswith("Description"):
+            if line.startswith(_("Description")):
                 info["description"] = line[line.find(":") + 1 :].strip()
-            if line.startswith("Architecture"):
+            if line.startswith(_("Architecture")):
                 info["architecture"] = line[line.find(":") + 1 :].strip()
-            if line.startswith("Install Reason"):
+            if line.startswith(_("Install Reason")):
                 info["reason"] = line[line.find(":") + 1 :].strip()
 
         keys_needed = ["name", "version", "description", "architecture", "reason"]
@@ -130,13 +132,13 @@ def get_available_info(package_name: Union[List[str], str]) -> List[dict]:
     elif isinstance(package_name, list):
         package_name_list = package_name
     else:
-        raise ValueError("package_name must be a string or a list of strings")
+        raise ValueError(_("package_name must be a string or a list of strings"))
     args = ["-Si", *package_name_list]
     try:
         stdout, stderr, retcode = execute_pacman_command(args)
     except CommandExecutionError as e:
         stderr = e.stderr
-        if "was not found" in stderr and "error" in stderr:
+        if _("was not found") in stderr and _("error") in stderr:
             logger.debug(f"Packages not found in source: {stderr}")
             stdout = e.stdout
         else:
@@ -148,17 +150,17 @@ def get_available_info(package_name: Union[List[str], str]) -> List[dict]:
         info = {}
         lines = block.split("\n")
         for line in lines:
-            if line.startswith("Name"):
+            if line.startswith(_("Name")):
                 info["name"] = line[line.find(":") + 1 :].strip()
-            if line.startswith("Version"):
+            if line.startswith(_("Version")):
                 info["version"] = line[line.find(":") + 1 :].strip()
-            if line.startswith("Description"):
+            if line.startswith(_("Description")):
                 info["description"] = line[line.find(":") + 1 :].strip()
-            if line.startswith("Architecture"):
+            if line.startswith(_("Architecture")):
                 info["architecture"] = line[line.find(":") + 1 :].strip()
-            if line.startswith("Replaces"):
+            if line.startswith(_("Replaces")):
                 info["replaces"] = line[line.find(":") + 1 :].strip()
-            if line.startswith("Repository"):
+            if line.startswith(_("Repository")):
                 info["repo"] = line[line.find(":") + 1 :].strip()
         keys_needed = [
             "name",
@@ -220,7 +222,7 @@ def get_upgradable(package_name: Union[List[str], str] = []) -> Dict[str, str]:
     except CommandExecutionError as e:
         # If there is no upgradable packages, pacman returns nonzero, which is not an error
         stderr = e.stderr
-        if "was not found" in stderr and "error" in stderr:
+        if _("was not found") in stderr and _("error") in stderr:
             logger.debug(
                 f"Packages not in local db, so can't determine upgradable: {stderr}"
             )
@@ -263,7 +265,7 @@ def get_all_packages() -> List[Package]:
         if name in installed_info_dict:
             installed = True
             automatically_installed = (
-                "Installed as a dependency" in installed_info_dict[name]["reason"]
+                _("Installed as a dependency") in installed_info_dict[name]["reason"]
             )
         else:
             installed = False
@@ -314,15 +316,17 @@ class PACMAN(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
             return []
         except Exception as e:
-            console.print(Panel(f"{e}", border_style="red", title="Operation Failed"))
+            console.print(
+                Panel(f"{e}", border_style="red", title=_("Operation Failed"))
+            )
             logger.debug(f"{traceback.format_exc()}")
             return []
 
@@ -348,9 +352,9 @@ class PACMAN(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
@@ -360,7 +364,7 @@ class PACMAN(PackageManagerBase):
                 Panel(
                     f"{e}",
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
@@ -380,9 +384,9 @@ class PACMAN(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
@@ -392,7 +396,7 @@ class PACMAN(PackageManagerBase):
                 Panel(
                     f"{e}",
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
@@ -416,22 +420,26 @@ class PACMAN(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
             if aihelper is None:
                 console.print(
                     Panel(
-                        "AI Helper not started, will enabled after configured by 'tinyget config'/'tinyget ui'",
+                        _(
+                            "AI Helper not started, will enabled after configured by 'tinyget config'/'tinyget ui'"
+                        ),
                         border_style="bright_black",
                     )
                 )
             else:
                 with console.status(
-                    "[bold green] AI Helper started, getting command advise",
+                    "[bold green] {}".format(
+                        _("AI Helper started, getting command advise")
+                    ),
                     spinner="bouncingBar",
                 ) as status:
                     recommendation = aihelper.fix_command(args, e.stdout, e.stderr)
@@ -439,7 +447,7 @@ class PACMAN(PackageManagerBase):
                     Panel(
                         recommendation,
                         border_style="green",
-                        title="Advise from AI Helper",
+                        title=_("Advise from AI Helper"),
                     )
                 )
             return (None, None, ERROR_HANDLED)
@@ -448,7 +456,7 @@ class PACMAN(PackageManagerBase):
                 Panel(
                     f"{e}",
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
@@ -472,22 +480,26 @@ class PACMAN(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
             if aihelper is None:
                 console.print(
                     Panel(
-                        "AI Helper not started, will enabled after configured by 'tinyget config'/'tinyget ui'",
+                        _(
+                            "AI Helper not started, will enabled after configured by 'tinyget config'/'tinyget ui'"
+                        ),
                         border_style="bright_black",
                     )
                 )
             else:
                 with console.status(
-                    "[bold green] AI Helper started, getting command advise",
+                    "[bold green] {}".format(
+                        _("AI Helper started, getting command advise")
+                    ),
                     spinner="bouncingBar",
                 ) as status:
                     recommendation = aihelper.fix_command(args, e.stdout, e.stderr)
@@ -495,7 +507,7 @@ class PACMAN(PackageManagerBase):
                     Panel(
                         recommendation,
                         border_style="green",
-                        title="Advise from AI Helper",
+                        title=_("Advise from AI Helper"),
                     )
                 )
             return (None, None, ERROR_HANDLED)
@@ -504,7 +516,7 @@ class PACMAN(PackageManagerBase):
                 Panel(
                     f"{e}",
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
@@ -543,7 +555,7 @@ class PACMAN(PackageManagerBase):
                 if name in installed_info_dict:
                     installed = True
                     automatically_installed = (
-                        "Installed as a dependency"
+                        _("Installed as a dependency")
                         in installed_info_dict[name]["reason"]
                     )
                 else:
@@ -574,9 +586,9 @@ class PACMAN(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    f"Output: {e.stdout}\nError: {e.stderr}",
+                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")
@@ -585,7 +597,7 @@ class PACMAN(PackageManagerBase):
                 Panel(
                     f"{e}",
                     border_style="red",
-                    title="Operation Failed",
+                    title=_("Operation Failed"),
                 )
             )
             logger.debug(f"{traceback.format_exc()}")

@@ -1,0 +1,106 @@
+# Chinese translations for tinyget package
+# tinyget 软件包的简体中文翻译.
+# Copyright (C) 2024 THE tinyget'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the tinyget package.
+# Pasationous RoyenHeart <royenheart@outlook.com>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: tinyget _pacman\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-09-12 08:35+0800\n"
+"PO-Revision-Date: 2024-09-12 08:39+0800\n"
+"Last-Translator: Pasationous RoyenHeart <royenheart@outlook.com>\n"
+"Language-Team: Chinese (simplified)\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../wrappers/_pacman.py:40
+msgid "Pacman Error during operation {} with {}"
+msgstr "Pacman 执行当前操作 {} 时发生错误 {}"
+
+#: ../wrappers/_pacman.py:74 ../wrappers/_pacman.py:135
+msgid "package_name must be a string or a list of strings"
+msgstr "包名必须是字符串或字符串列表"
+
+#: ../wrappers/_pacman.py:80 ../wrappers/_pacman.py:141
+#: ../wrappers/_pacman.py:225
+# used in pacman search some packages that not found
+# it will print 'Error: package xxx was not found'
+# which is different in different language
+msgid "was not found"
+msgstr "未找到"
+
+#: ../wrappers/_pacman.py:80 ../wrappers/_pacman.py:141
+#: ../wrappers/_pacman.py:225
+# same as 'was not found'
+msgid "error"
+msgstr "错误"
+
+#: ../wrappers/_pacman.py:92 ../wrappers/_pacman.py:153
+msgid "Name"
+msgstr "名字"
+
+#: ../wrappers/_pacman.py:94 ../wrappers/_pacman.py:155
+msgid "Version"
+msgstr "版本"
+
+#: ../wrappers/_pacman.py:96 ../wrappers/_pacman.py:157
+msgid "Description"
+msgstr "描述"
+
+#: ../wrappers/_pacman.py:98 ../wrappers/_pacman.py:159
+msgid "Architecture"
+msgstr "架构"
+
+#: ../wrappers/_pacman.py:100
+msgid "Install Reason"
+msgstr "安装原因"
+
+#: ../wrappers/_pacman.py:161
+msgid "Replaces"
+msgstr "取代"
+
+#: ../wrappers/_pacman.py:163
+msgid "Repository"
+msgstr "软件库"
+
+#: ../wrappers/_pacman.py:268 ../wrappers/_pacman.py:558
+msgid "Installed as a dependency"
+msgstr "作为其他软件包的依赖关系安装"
+
+#: ../wrappers/_pacman.py:319 ../wrappers/_pacman.py:355
+#: ../wrappers/_pacman.py:387 ../wrappers/_pacman.py:423
+#: ../wrappers/_pacman.py:483 ../wrappers/_pacman.py:589
+msgid ""
+"Output: {}\n"
+"Error: {}"
+msgstr ""
+"输出：{}\n"
+"错误：{}"
+
+#: ../wrappers/_pacman.py:321 ../wrappers/_pacman.py:328
+#: ../wrappers/_pacman.py:357 ../wrappers/_pacman.py:367
+#: ../wrappers/_pacman.py:389 ../wrappers/_pacman.py:399
+#: ../wrappers/_pacman.py:425 ../wrappers/_pacman.py:459
+#: ../wrappers/_pacman.py:485 ../wrappers/_pacman.py:519
+#: ../wrappers/_pacman.py:591 ../wrappers/_pacman.py:600
+msgid "Operation Failed"
+msgstr "操作失败"
+
+#: ../wrappers/_pacman.py:433 ../wrappers/_pacman.py:493
+msgid ""
+"AI Helper not started, will enabled after configured by 'tinyget "
+"config'/'tinyget ui'"
+msgstr ""
+"AI 助手未启动，在使用 'tinyget config' 或 'tinyget ui' 配置完成后启用"
+
+#: ../wrappers/_pacman.py:441 ../wrappers/_pacman.py:501
+msgid "AI Helper started, getting command advise"
+msgstr "AI 助手启动，正在获取命令帮助中"
+
+#: ../wrappers/_pacman.py:450 ../wrappers/_pacman.py:510
+msgid "Advise from AI Helper"
+msgstr "AI 助手提示"

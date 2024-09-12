@@ -1,0 +1,103 @@
+# English translations for tinyget package.
+# Copyright (C) 2024 THE tinyget'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the tinyget package.
+# Pasationous RoyenHeart <royenheart@outlook.com>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: tinyget _pacman\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-09-12 08:35+0800\n"
+"PO-Revision-Date: 2024-09-12 08:39+0800\n"
+"Last-Translator: Pasationous RoyenHeart <royenheart@outlook.com>\n"
+"Language-Team: English\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../wrappers/_pacman.py:40
+msgid "Pacman Error during operation {} with {}"
+msgstr "Pacman Error during operation {} with {}"
+
+#: ../wrappers/_pacman.py:74 ../wrappers/_pacman.py:135
+msgid "package_name must be a string or a list of strings"
+msgstr "package_name must be a string or a list of strings"
+
+#: ../wrappers/_pacman.py:80 ../wrappers/_pacman.py:141
+#: ../wrappers/_pacman.py:225
+msgid "was not found"
+msgstr "was not found"
+
+#: ../wrappers/_pacman.py:80 ../wrappers/_pacman.py:141
+#: ../wrappers/_pacman.py:225
+msgid "error"
+msgstr "error"
+
+#: ../wrappers/_pacman.py:92 ../wrappers/_pacman.py:153
+msgid "Name"
+msgstr "Name"
+
+#: ../wrappers/_pacman.py:94 ../wrappers/_pacman.py:155
+msgid "Version"
+msgstr "Version"
+
+#: ../wrappers/_pacman.py:96 ../wrappers/_pacman.py:157
+msgid "Description"
+msgstr "Description"
+
+#: ../wrappers/_pacman.py:98 ../wrappers/_pacman.py:159
+msgid "Architecture"
+msgstr "Architecture"
+
+#: ../wrappers/_pacman.py:100
+msgid "Install Reason"
+msgstr "Install Reason"
+
+#: ../wrappers/_pacman.py:161
+msgid "Replaces"
+msgstr "Replaces"
+
+#: ../wrappers/_pacman.py:163
+msgid "Repository"
+msgstr "Repository"
+
+#: ../wrappers/_pacman.py:268 ../wrappers/_pacman.py:558
+msgid "Installed as a dependency"
+msgstr "Installed as a dependency"
+
+#: ../wrappers/_pacman.py:319 ../wrappers/_pacman.py:355
+#: ../wrappers/_pacman.py:387 ../wrappers/_pacman.py:423
+#: ../wrappers/_pacman.py:483 ../wrappers/_pacman.py:589
+msgid ""
+"Output: {}\n"
+"Error: {}"
+msgstr ""
+"Output: {}\n"
+"Error: {}"
+
+#: ../wrappers/_pacman.py:321 ../wrappers/_pacman.py:328
+#: ../wrappers/_pacman.py:357 ../wrappers/_pacman.py:367
+#: ../wrappers/_pacman.py:389 ../wrappers/_pacman.py:399
+#: ../wrappers/_pacman.py:425 ../wrappers/_pacman.py:459
+#: ../wrappers/_pacman.py:485 ../wrappers/_pacman.py:519
+#: ../wrappers/_pacman.py:591 ../wrappers/_pacman.py:600
+msgid "Operation Failed"
+msgstr "Operation Failed"
+
+#: ../wrappers/_pacman.py:433 ../wrappers/_pacman.py:493
+msgid ""
+"AI Helper not started, will enabled after configured by 'tinyget "
+"config'/'tinyget ui'"
+msgstr ""
+"AI Helper not started, will enabled after configured by 'tinyget "
+"config'/'tinyget ui'"
+
+#: ../wrappers/_pacman.py:441 ../wrappers/_pacman.py:501
+msgid "AI Helper started, getting command advise"
+msgstr "AI Helper started, getting command advise"
+
+#: ../wrappers/_pacman.py:450 ../wrappers/_pacman.py:510
+msgid "Advise from AI Helper"
+msgstr "Advise from AI Helper"

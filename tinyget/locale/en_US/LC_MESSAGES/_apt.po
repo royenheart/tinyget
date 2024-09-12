@@ -1,0 +1,79 @@
+# English translations for tinyget package.
+# Copyright (C) 2024 THE tinyget'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the tinyget package.
+# Pasationous RoyenHeart <royenheart@outlook.com>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: tinyget _apt\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-09-12 08:30+0800\n"
+"PO-Revision-Date: 2024-09-12 08:38+0800\n"
+"Last-Translator: Pasationous RoyenHeart <royenheart@outlook.com>\n"
+"Language-Team: English\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../wrappers/_apt.py:40
+msgid "APT error during operation {} with {}"
+msgstr "APT error during operation {} with {}"
+
+#: ../wrappers/_apt.py:87
+msgid "installed"
+msgstr "installed"
+
+#: ../wrappers/_apt.py:89
+msgid "auto"
+msgstr "auto"
+
+#: ../wrappers/_apt.py:91
+msgid "upgradable"
+msgstr "upgradable"
+
+#: ../wrappers/_apt.py:96
+msgid ":"
+msgstr ":"
+
+#: ../wrappers/_apt.py:101
+msgid "Can't parse status is upgradable: {}"
+msgstr "Can't parse status is upgradable: {}"
+
+#: ../wrappers/_apt.py:167 ../wrappers/_apt.py:203 ../wrappers/_apt.py:239
+#: ../wrappers/_apt.py:275 ../wrappers/_apt.py:335 ../wrappers/_apt.py:395
+msgid ""
+"Output: {}\n"
+"Error: {}"
+msgstr ""
+"Output: {}\n"
+"Error: {}"
+
+#: ../wrappers/_apt.py:169 ../wrappers/_apt.py:176 ../wrappers/_apt.py:205
+#: ../wrappers/_apt.py:215 ../wrappers/_apt.py:241 ../wrappers/_apt.py:251
+#: ../wrappers/_apt.py:277 ../wrappers/_apt.py:311 ../wrappers/_apt.py:337
+#: ../wrappers/_apt.py:371 ../wrappers/_apt.py:397 ../wrappers/_apt.py:406
+msgid "Operation Failed"
+msgstr "Operation Failed"
+
+#: ../wrappers/_apt.py:285 ../wrappers/_apt.py:345
+msgid ""
+"AI Helper not started, will enabled after configured by 'tinyget "
+"config'/'tinyget ui'"
+msgstr ""
+"AI Helper not started, will enabled after configured by 'tinyget "
+"config'/'tinyget ui'"
+
+#: ../wrappers/_apt.py:293 ../wrappers/_apt.py:353
+msgid "AI Helper started, getting command advise"
+msgstr "AI Helper started, getting command advise"
+
+#: ../wrappers/_apt.py:302 ../wrappers/_apt.py:362
+msgid "Advise from AI Helper"
+msgstr "Advise from AI Helper"
+
+# used when split status
+# , split symbol in 'status' is different in different language
+msgid ","
+msgstr "," 
