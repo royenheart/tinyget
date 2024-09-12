@@ -78,3 +78,9 @@ msgstr "AI 助手提示"
 # , split symbol in 'status' is different in different language
 msgid ","
 msgstr "，" 
+
+msgid "Permission denied"
+msgstr "权限不够"
+
+msgid "Run tinyget in superuser privileges (using sudo / sudo-rs or configuring one admin user and group)"
+msgstr "在特权模式下使用 tinyget（使用 sudo / sudo-rs 或者配置一个管理员账户和组）"

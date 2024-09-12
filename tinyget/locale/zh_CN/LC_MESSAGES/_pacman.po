@@ -104,3 +104,9 @@ msgstr "AI 助手启动，正在获取命令帮助中"
 #: ../wrappers/_pacman.py:450 ../wrappers/_pacman.py:510
 msgid "Advise from AI Helper"
 msgstr "AI 助手提示"
+
+msgid "error: you cannot perform this operation unless you are root."
+msgstr "错误：非 root (根用户) 无法执行指定操作。"
+
+msgid "Run tinyget in superuser privileges (using sudo / sudo-rs or configuring one admin user and group)"
+msgstr "在特权模式下使用 tinyget（使用 sudo / sudo-rs 或者配置一个管理员账户和组）"

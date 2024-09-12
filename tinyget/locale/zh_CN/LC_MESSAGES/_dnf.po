@@ -70,3 +70,9 @@ msgstr "AI 助手启动，正在获取命令帮助中"
 #: ../wrappers/_dnf.py:429 ../wrappers/_dnf.py:489
 msgid "Advise from AI Helper"
 msgstr "AI 助手提示"
+
+msgid "Error: This command has to be run with superuser privileges (under the root user on most systems)."
+msgstr "错误：运行此命令需要管理员特权（多数系统下是root用户）。"
+
+msgid "Run tinyget in superuser privileges (using sudo / sudo-rs or configuring one admin user and group)"
+msgstr "在特权模式下使用 tinyget（使用 sudo / sudo-rs 或者配置一个管理员账户和组）"

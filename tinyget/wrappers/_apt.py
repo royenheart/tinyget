@@ -198,13 +198,24 @@ class APT(PackageManagerBase):
         try:
             result = execute_apt_command(args)
         except CommandExecutionError as e:
-            console.print(
-                Panel(
-                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
-                    border_style="red",
-                    title=_("Operation Failed"),
+            if _("Permission denied") in e.stderr:
+                console.print(
+                    Panel(
+                        _(
+                            "Run tinyget in superuser privileges (using sudo / sudo-rs or configuring one admin user and group)"
+                        ),
+                        border_style="red",
+                        title=_("Operation Failed"),
+                    )
                 )
-            )
+            else:
+                console.print(
+                    Panel(
+                        _("Output: {}\nError: {}").format(e.stdout, e.stderr),
+                        border_style="red",
+                        title=_("Operation Failed"),
+                    )
+                )
             logger.debug(f"{traceback.format_exc()}")
             return (None, None, ERROR_HANDLED)
         except Exception as e:
@@ -234,13 +245,24 @@ class APT(PackageManagerBase):
         try:
             result = execute_apt_command(args)
         except CommandExecutionError as e:
-            console.print(
-                Panel(
-                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
-                    border_style="red",
-                    title=_("Operation Failed"),
+            if _("Permission denied") in e.stderr:
+                console.print(
+                    Panel(
+                        _(
+                            "Run tinyget in superuser privileges (using sudo / sudo-rs or configuring one admin user and group)"
+                        ),
+                        border_style="red",
+                        title=_("Operation Failed"),
+                    )
                 )
-            )
+            else:
+                console.print(
+                    Panel(
+                        _("Output: {}\nError: {}").format(e.stdout, e.stderr),
+                        border_style="red",
+                        title=_("Operation Failed"),
+                    )
+                )
             logger.debug(f"{traceback.format_exc()}")
             return (None, None, ERROR_HANDLED)
         except Exception as e:
@@ -270,13 +292,24 @@ class APT(PackageManagerBase):
         try:
             result = execute_apt_command(args)
         except CommandExecutionError as e:
-            console.print(
-                Panel(
-                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
-                    border_style="red",
-                    title=_("Operation Failed"),
+            if _("Permission denied") in e.stderr:
+                console.print(
+                    Panel(
+                        _(
+                            "Run tinyget in superuser privileges (using sudo / sudo-rs or configuring one admin user and group)"
+                        ),
+                        border_style="red",
+                        title=_("Operation Failed"),
+                    )
                 )
-            )
+            else:
+                console.print(
+                    Panel(
+                        _("Output: {}\nError: {}").format(e.stdout, e.stderr),
+                        border_style="red",
+                        title=_("Operation Failed"),
+                    )
+                )
             logger.debug(f"{traceback.format_exc()}")
             if aihelper is None:
                 console.print(
@@ -330,13 +363,24 @@ class APT(PackageManagerBase):
         try:
             result = execute_apt_command(args)
         except CommandExecutionError as e:
-            console.print(
-                Panel(
-                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
-                    border_style="red",
-                    title=_("Operation Failed"),
+            if _("Permission denied") in e.stderr:
+                console.print(
+                    Panel(
+                        _(
+                            "Run tinyget in superuser privileges (using sudo / sudo-rs or configuring one admin user and group)"
+                        ),
+                        border_style="red",
+                        title=_("Operation Failed"),
+                    )
                 )
-            )
+            else:
+                console.print(
+                    Panel(
+                        _("Output: {}\nError: {}").format(e.stdout, e.stderr),
+                        border_style="red",
+                        title=_("Operation Failed"),
+                    )
+                )
             logger.debug(f"{traceback.format_exc()}")
             if aihelper is None:
                 console.print(

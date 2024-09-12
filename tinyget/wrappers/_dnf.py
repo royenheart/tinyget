@@ -361,13 +361,29 @@ class DNF(PackageManagerBase):
         try:
             result = execute_dnf_command(args)
         except CommandExecutionError as e:
-            console.print(
-                Panel(
-                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
-                    border_style="red",
-                    title=_("Operation Failed"),
+            if (
+                _(
+                    "Error: This command has to be run with superuser privileges (under the root user on most systems)."
                 )
-            )
+                in e.stderr
+            ):
+                console.print(
+                    Panel(
+                        _(
+                            "Run tinyget in superuser privileges (using sudo / sudo-rs or configuring one admin user and group)"
+                        ),
+                        border_style="red",
+                        title=_("Operation Failed"),
+                    )
+                )
+            else:
+                console.print(
+                    Panel(
+                        _("Output: {}\nError: {}").format(e.stdout, e.stderr),
+                        border_style="red",
+                        title=_("Operation Failed"),
+                    )
+                )
             logger.debug(f"{traceback.format_exc()}")
             return (None, None, ERROR_HANDLED)
         except Exception as e:
@@ -397,13 +413,29 @@ class DNF(PackageManagerBase):
         try:
             result = execute_dnf_command(args)
         except CommandExecutionError as e:
-            console.print(
-                Panel(
-                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
-                    border_style="red",
-                    title=_("Operation Failed"),
+            if (
+                _(
+                    "Error: This command has to be run with superuser privileges (under the root user on most systems)."
                 )
-            )
+                in e.stderr
+            ):
+                console.print(
+                    Panel(
+                        _(
+                            "Run tinyget in superuser privileges (using sudo / sudo-rs or configuring one admin user and group)"
+                        ),
+                        border_style="red",
+                        title=_("Operation Failed"),
+                    )
+                )
+            else:
+                console.print(
+                    Panel(
+                        _("Output: {}\nError: {}").format(e.stdout, e.stderr),
+                        border_style="red",
+                        title=_("Operation Failed"),
+                    )
+                )
             logger.debug(f"{traceback.format_exc()}")
             if aihelper is None:
                 console.print(
@@ -457,13 +489,29 @@ class DNF(PackageManagerBase):
         try:
             result = execute_dnf_command(args)
         except CommandExecutionError as e:
-            console.print(
-                Panel(
-                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
-                    border_style="red",
-                    title=_("Operation Failed"),
+            if (
+                _(
+                    "Error: This command has to be run with superuser privileges (under the root user on most systems)."
                 )
-            )
+                in e.stderr
+            ):
+                console.print(
+                    Panel(
+                        _(
+                            "Run tinyget in superuser privileges (using sudo / sudo-rs or configuring one admin user and group)"
+                        ),
+                        border_style="red",
+                        title=_("Operation Failed"),
+                    )
+                )
+            else:
+                console.print(
+                    Panel(
+                        _("Output: {}\nError: {}").format(e.stdout, e.stderr),
+                        border_style="red",
+                        title=_("Operation Failed"),
+                    )
+                )
             logger.debug(f"{traceback.format_exc()}")
             if aihelper is None:
                 console.print(
