@@ -12,7 +12,7 @@ def get_lang() -> str:
         return "en_US"
     lang = os.environ["LANG"]
     lang = lang.split(".")[0]
-    lpath = os.path.join(global_configs["LOCALE_DIR"], lang)
+    lpath = os.path.join(global_configs["LOCALE_DIR"], lang)  # type: ignore
     if not os.path.exists(lpath):
         logger.warning(
             f"Cannot find translation for {lang}, will use default language: en_US"
@@ -23,6 +23,6 @@ def get_lang() -> str:
 
 def load_translation(module: str):
     t = translation(
-        module, localedir=global_configs["LOCALE_DIR"], languages=[get_lang()]
+        module, localedir=global_configs["LOCALE_DIR"], languages=[get_lang()]  # type: ignore
     )
     return t.gettext
