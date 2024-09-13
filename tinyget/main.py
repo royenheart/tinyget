@@ -143,6 +143,29 @@ def rollback(id: str):
     package_manager.rollback(id=id)
 
 
+@cli.command("repo_configure", help="configure repo. Will use builtin mirror list")
+@click.argument("repo", nargs=1, required=True)
+def repo_configure(repo: str):
+    package_manager = PackageManager()
+    script = package_manager.repo_configure_get_script(repo=repo)
+    if script is None:
+        click.echo(f"No script found for repo: {repo}")
+    else:
+        click.echo(
+            f"script has been generated at {script}. Please check its contents and run it at your own risk."
+        )
+
+
+@cli.command("repo_list", help="List all available repos in builtin mirror list.")
+def repo_list():
+    package_manager = PackageManager()
+    repos = package_manager.repo_list()
+    for k, v in repos.items():
+        click.echo(f"{k}:")
+        for repo in v:
+            click.echo(f"\t{repo}")
+
+
 @cli.command(help="Interactively set up ai_helper for tinyget.")
 @click.option(
     "--host",

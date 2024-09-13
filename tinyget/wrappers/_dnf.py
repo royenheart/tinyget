@@ -678,9 +678,6 @@ class DNF(PackageManagerBase):
             return (None, None, ERROR_UNKNOWN)
         return result
 
-    def repo_manager(self):
-        raise NotImplementedError
-
 
 if __name__ == "__main__":
     dnf = DNF()

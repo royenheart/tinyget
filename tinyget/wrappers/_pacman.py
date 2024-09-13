@@ -828,9 +828,6 @@ class PACMAN(PackageManagerBase):
     def rollback(self, id: str):
         raise NotImplementedError
 
-    def repo_manager(self):
-        raise NotImplementedError
-
 
 if __name__ == "__main__":
     pacman = PACMAN()
