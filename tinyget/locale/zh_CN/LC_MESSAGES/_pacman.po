@@ -17,9 +17,10 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../wrappers/_pacman.py:40
-msgid "Pacman Error during operation {} with {}"
-msgstr "Pacman 执行当前操作 {} 时发生错误 {}"
+# 0: the operation
+# 1: the execution environment
+msgid "Pacman Error during operation {0} with {1}"
+msgstr "Pacman 执行当前操作 {0} 时发生错误，执行环境为 {1}"
 
 #: ../wrappers/_pacman.py:74 ../wrappers/_pacman.py:135
 msgid "package_name must be a string or a list of strings"
@@ -71,15 +72,14 @@ msgstr "软件库"
 msgid "Installed as a dependency"
 msgstr "作为其他软件包的依赖关系安装"
 
-#: ../wrappers/_pacman.py:319 ../wrappers/_pacman.py:355
-#: ../wrappers/_pacman.py:387 ../wrappers/_pacman.py:423
-#: ../wrappers/_pacman.py:483 ../wrappers/_pacman.py:589
+# 0: The Output
+# 1: The Error
 msgid ""
-"Output: {}\n"
-"Error: {}"
+"Output: {0}\n"
+"Error: {1}"
 msgstr ""
-"输出：{}\n"
-"错误：{}"
+"输出：{0}\n"
+"错误：{1}"
 
 #: ../wrappers/_pacman.py:321 ../wrappers/_pacman.py:328
 #: ../wrappers/_pacman.py:357 ../wrappers/_pacman.py:367

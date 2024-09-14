@@ -40,7 +40,8 @@ def execute_dnf_command(args: List[str], timeout: Optional[float] = None):
     elif retcode == 1:
         raise CommandExecutionError(
             message=_(
-                "An error occurred when executing {} with {}, was handled by dnf"
+                # 0: args the operation. 1: envp the execution environment
+                "An error occurred when executing {0} with {1}, was handled by dnf"
             ).format(args, envp),
             args=list(args),
             envp=envp,
@@ -50,7 +51,8 @@ def execute_dnf_command(args: List[str], timeout: Optional[float] = None):
     elif retcode == 3:
         raise CommandExecutionError(
             message=_(
-                "An unknown unhandled error occurred during operation {} with {}"
+                # 0: args the operation. 1: envp the execution environment
+                "An unknown unhandled error occurred during operation {0} with {1}"
             ).format(args, envp),
             args=list(args),
             envp=envp,
@@ -63,7 +65,8 @@ def execute_dnf_command(args: List[str], timeout: Optional[float] = None):
     elif retcode == 200:
         raise CommandExecutionError(
             message=_(
-                "Problem with acquiring or releasing of locks raised during operation {} with {}"
+                # 0: args the operation. 1: envp the execution environment
+                "Problem with acquiring or releasing of locks raised during operation {0} with {1}"
             ).format(args, envp),
             args=list(args),
             envp=envp,
@@ -72,7 +75,8 @@ def execute_dnf_command(args: List[str], timeout: Optional[float] = None):
         )
     else:
         raise CommandExecutionError(
-            message=_("Unknown dnf error during operation {} with {}").format(
+            # 0: args the operation. 1: envp the execution environment
+            message=_("Unknown dnf error during operation {0} with {1}").format(
                 args, envp
             ),
             args=list(args),
@@ -291,7 +295,8 @@ class DNF(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
+                    # 0: e.stdout the Output. 1: e.stderr the Error.
+                    _("Output: {0}\nError: {1}").format(e.stdout, e.stderr),
                     border_style="red",
                     title=_("Operation Failed"),
                 )
@@ -331,7 +336,8 @@ class DNF(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
+                    # 0: e.stdout the Output. 1: e.stderr the Error.
+                    _("Output: {0}\nError: {1}").format(e.stdout, e.stderr),
                     border_style="red",
                     title=_("Operation Failed"),
                 )
@@ -379,7 +385,8 @@ class DNF(PackageManagerBase):
             else:
                 console.print(
                     Panel(
-                        _("Output: {}\nError: {}").format(e.stdout, e.stderr),
+                        # 0: e.stdout the Output. 1: e.stderr the Error.
+                        _("Output: {0}\nError: {1}").format(e.stdout, e.stderr),
                         border_style="red",
                         title=_("Operation Failed"),
                     )
@@ -431,7 +438,8 @@ class DNF(PackageManagerBase):
             else:
                 console.print(
                     Panel(
-                        _("Output: {}\nError: {}").format(e.stdout, e.stderr),
+                        # 0: e.stdout the Output. 1: e.stderr the Error.
+                        _("Output: {0}\nError: {1}").format(e.stdout, e.stderr),
                         border_style="red",
                         title=_("Operation Failed"),
                     )
@@ -507,7 +515,8 @@ class DNF(PackageManagerBase):
             else:
                 console.print(
                     Panel(
-                        _("Output: {}\nError: {}").format(e.stdout, e.stderr),
+                        # 0: e.stdout the Output. 1: e.stderr the Error.
+                        _("Output: {0}\nError: {1}").format(e.stdout, e.stderr),
                         border_style="red",
                         title=_("Operation Failed"),
                     )
@@ -567,7 +576,8 @@ class DNF(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
+                    # 0: e.stdout the Output. 1: e.stderr the Error.
+                    _("Output: {0}\nError: {1}").format(e.stdout, e.stderr),
                     border_style="red",
                     title=_("Operation Failed"),
                 )

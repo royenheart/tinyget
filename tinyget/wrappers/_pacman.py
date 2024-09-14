@@ -37,7 +37,8 @@ def execute_pacman_command(args: List[str], timeout: Optional[float] = None):
         return (out, err, retcode)
     else:
         raise CommandExecutionError(
-            message=_("Pacman Error during operation {} with {}").format(args, envp),
+            # 0: args the operation, 1: envp the execution environment
+            message=_("Pacman Error during operation {0} with {1}").format(args, envp),
             args=list(args),
             envp=envp,
             stdout=out,
@@ -319,7 +320,8 @@ class PACMAN(PackageManagerBase):
         except CommandExecutionError as e:
             console.print(
                 Panel(
-                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
+                    # 0: e.stdout the Output. 1: e.stderr the Error.
+                    _("Output: {0}\nError: {1}").format(e.stdout, e.stderr),
                     border_style="red",
                     title=_("Operation Failed"),
                 )
@@ -369,7 +371,8 @@ class PACMAN(PackageManagerBase):
             else:
                 console.print(
                     Panel(
-                        _("Output: {}\nError: {}").format(e.stdout, e.stderr),
+                        # 0: e.stdout the Output. 1: e.stderr the Error.
+                        _("Output: {0}\nError: {1}").format(e.stdout, e.stderr),
                         border_style="red",
                         title=_("Operation Failed"),
                     )
@@ -415,7 +418,8 @@ class PACMAN(PackageManagerBase):
             else:
                 console.print(
                     Panel(
-                        _("Output: {}\nError: {}").format(e.stdout, e.stderr),
+                        # 0: e.stdout the Output. 1: e.stderr the Error.
+                        _("Output: {0}\nError: {1}").format(e.stdout, e.stderr),
                         border_style="red",
                         title=_("Operation Failed"),
                     )
@@ -465,7 +469,8 @@ class PACMAN(PackageManagerBase):
             else:
                 console.print(
                     Panel(
-                        _("Output: {}\nError: {}").format(e.stdout, e.stderr),
+                        # 0: e.stdout the Output. 1: e.stderr the Error.
+                        _("Output: {0}\nError: {1}").format(e.stdout, e.stderr),
                         border_style="red",
                         title=_("Operation Failed"),
                     )
@@ -539,7 +544,8 @@ class PACMAN(PackageManagerBase):
             else:
                 console.print(
                     Panel(
-                        _("Output: {}\nError: {}").format(e.stdout, e.stderr),
+                        # 0: e.stdout the Output. 1: e.stderr the Error.
+                        _("Output: {0}\nError: {1}").format(e.stdout, e.stderr),
                         border_style="red",
                         title=_("Operation Failed"),
                     )
@@ -648,7 +654,8 @@ class PACMAN(PackageManagerBase):
                 return package_list
             console.print(
                 Panel(
-                    _("Output: {}\nError: {}").format(e.stdout, e.stderr),
+                    # 0: e.stdout the Output. 1: e.stderr the Error.
+                    _("Output: {0}\nError: {1}").format(e.stdout, e.stderr),
                     border_style="red",
                     title=_("Operation Failed"),
                 )

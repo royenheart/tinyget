@@ -18,8 +18,8 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ../wrappers/_pacman.py:40
-msgid "Pacman Error during operation {} with {}"
-msgstr "Pacman Error during operation {} with {}"
+msgid "Pacman Error during operation {0} with {1}"
+msgstr "Pacman Error during operation {0} with {1}"
 
 #: ../wrappers/_pacman.py:74 ../wrappers/_pacman.py:135
 msgid "package_name must be a string or a list of strings"
@@ -67,15 +67,14 @@ msgstr "Repository"
 msgid "Installed as a dependency"
 msgstr "Installed as a dependency"
 
-#: ../wrappers/_pacman.py:319 ../wrappers/_pacman.py:355
-#: ../wrappers/_pacman.py:387 ../wrappers/_pacman.py:423
-#: ../wrappers/_pacman.py:483 ../wrappers/_pacman.py:589
+# 0: The Output.
+# 1: The Error.
 msgid ""
-"Output: {}\n"
-"Error: {}"
+"Output: {0}\n"
+"Error: {1}"
 msgstr ""
-"Output: {}\n"
-"Error: {}"
+"Output: {0}\n"
+"Error: {1}"
 
 #: ../wrappers/_pacman.py:321 ../wrappers/_pacman.py:328
 #: ../wrappers/_pacman.py:357 ../wrappers/_pacman.py:367

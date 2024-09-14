@@ -17,9 +17,10 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../wrappers/_apt.py:40
-msgid "APT error during operation {} with {}"
-msgstr "APT 在操作 {} 时发生错误 {}"
+# 0: The operation.
+# 1: The execution environment
+msgid "APT error during operation {0} with {1}"
+msgstr "APT 在操作 {0} 时发生错误，执行环境为 {1}"
 
 #: ../wrappers/_apt.py:87
 msgid "installed"
@@ -39,18 +40,18 @@ msgstr "可从该版本升级"
 msgid ":"
 msgstr "："
 
-#: ../wrappers/_apt.py:101
-msgid "Can't parse status is upgradable: {}"
-msgstr "无法分析软件包状态是否可升级：{}"
+# 0: The status captured
+msgid "Can't parse status is upgradable: {0}"
+msgstr "无法分析软件包状态是否可升级：{0}"
 
-#: ../wrappers/_apt.py:167 ../wrappers/_apt.py:203 ../wrappers/_apt.py:239
-#: ../wrappers/_apt.py:275 ../wrappers/_apt.py:335 ../wrappers/_apt.py:395
+# 0: The Output.
+# 1: The Error.
 msgid ""
-"Output: {}\n"
-"Error: {}"
+"Output: {0}\n"
+"Error: {1}"
 msgstr ""
-"输出：{}\n"
-"错误：{}"
+"输出：{0}\n"
+"错误：{1}"
 
 #: ../wrappers/_apt.py:169 ../wrappers/_apt.py:176 ../wrappers/_apt.py:205
 #: ../wrappers/_apt.py:215 ../wrappers/_apt.py:241 ../wrappers/_apt.py:251

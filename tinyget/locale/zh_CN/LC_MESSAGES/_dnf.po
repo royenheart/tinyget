@@ -17,37 +17,41 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../wrappers/_dnf.py:43
-msgid "An error occurred when executing {} with {}, was handled by dnf"
-msgstr "当前执行 {} 时发生错误 {}，已由 dnf 处理"
+# 0: The operation
+# 1: The execution environment
+msgid "An error occurred when executing {0} with {1}, was handled by dnf"
+msgstr "当前执行 {0} 时发生错误，执行环境为 {1}，已由 dnf 处理"
 
-#: ../wrappers/_dnf.py:53
-msgid "An unknown unhandled error occurred during operation {} with {}"
-msgstr "当前执行 {} 时发生未知的未处理错误 {}"
+# 0: The operation
+# 1: The execution environment
+msgid "An unknown unhandled error occurred during operation {0} with {1}"
+msgstr "当前执行 {0} 时发生未知的未处理错误，执行环境为 {1}"
 
-#: ../wrappers/_dnf.py:66
+# 0: The operation
+# 1: The execution environment
 msgid ""
-"Problem with acquiring or releasing of locks raised during operation {} with "
-"{}"
+"Problem with acquiring or releasing of locks raised during operation {0} with "
+"{1}"
 msgstr ""
-"当前执行 {} 时发生锁问题（dnf 获取或释放锁时） {}"
+"当前执行 {0} 时发生锁问题（dnf 获取或释放锁时），执行环境为 {1}"
 
-#: ../wrappers/_dnf.py:75
-msgid "Unknown dnf error during operation {} with {}"
-msgstr "当前执行 {} 时发生未知的 dnf 错误 {}"
+# 0: The operation
+# 1: The execution environment
+msgid "Unknown dnf error during operation {0} with {1}"
+msgstr "当前执行 {0} 时发生未知的 dnf 错误，执行环境为 {1}"
 
 #: ../wrappers/_dnf.py:151
 msgid "flags must be a string or a list"
 msgstr "标志必须是字符串或列表"
 
-#: ../wrappers/_dnf.py:294 ../wrappers/_dnf.py:334 ../wrappers/_dnf.py:366
-#: ../wrappers/_dnf.py:402 ../wrappers/_dnf.py:462 ../wrappers/_dnf.py:522
+# 0: The Output.
+# 1: The Error.
 msgid ""
-"Output: {}\n"
-"Error: {}"
+"Output: {0}\n"
+"Error: {1}"
 msgstr ""
-"输出：{}\n"
-"错误：{}"
+"输出：{0}\n"
+"错误：{1}"
 
 #: ../wrappers/_dnf.py:296 ../wrappers/_dnf.py:306 ../wrappers/_dnf.py:336
 #: ../wrappers/_dnf.py:346 ../wrappers/_dnf.py:368 ../wrappers/_dnf.py:378

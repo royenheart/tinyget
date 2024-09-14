@@ -17,9 +17,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../wrappers/_apt.py:40
-msgid "APT error during operation {} with {}"
-msgstr "APT error during operation {} with {}"
+# 0: The operation.
+# 1: The execution environment.
+msgid "APT error during operation {0} with {1}"
+msgstr "APT error during operation {0} with {1}"
 
 #: ../wrappers/_apt.py:87
 msgid "installed"
@@ -37,18 +38,18 @@ msgstr "upgradable"
 msgid ":"
 msgstr ":"
 
-#: ../wrappers/_apt.py:101
-msgid "Can't parse status is upgradable: {}"
-msgstr "Can't parse status is upgradable: {}"
+# 0: The status captured
+msgid "Can't parse status is upgradable: {0}"
+msgstr "Can't parse status is upgradable: {0}"
 
-#: ../wrappers/_apt.py:167 ../wrappers/_apt.py:203 ../wrappers/_apt.py:239
-#: ../wrappers/_apt.py:275 ../wrappers/_apt.py:335 ../wrappers/_apt.py:395
+# 0: The Output.
+# 1: The Error.
 msgid ""
-"Output: {}\n"
-"Error: {}"
+"Output: {0}\n"
+"Error: {1}"
 msgstr ""
-"Output: {}\n"
-"Error: {}"
+"Output: {0}\n"
+"Error: {1}"
 
 #: ../wrappers/_apt.py:169 ../wrappers/_apt.py:176 ../wrappers/_apt.py:205
 #: ../wrappers/_apt.py:215 ../wrappers/_apt.py:241 ../wrappers/_apt.py:251
