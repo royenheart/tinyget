@@ -3,7 +3,7 @@ import os
 import re
 import traceback
 from tinyget.common_utils import logger
-from tinyget.globals import ERROR_HANDLED, ERROR_UNKNOWN
+from tinyget.globals import ERROR_HANDLED, ERROR_UNKNOWN, global_configs
 from tinyget.interact.process import CommandExecutionError
 from rich.console import Console
 from rich.panel import Panel
@@ -126,7 +126,11 @@ def get_installed_info(package_name: Union[List[str], str]) -> List[dict]:
         package_name_list = package_name
     else:
         raise ValueError(_("package_name must be a string or a list of strings"))
-    args = ["-Qi", "--noconfirm", *package_name_list]
+    use_input = global_configs["live_output"]
+    if use_input:
+        args = ["-Qi", *package_name_list]
+    else:
+        args = ["-Qi", "--noconfirm", *package_name_list]
     try:
         stdout, stderr, retcode = execute_pacman_command(args)
     except CommandExecutionError as e:
@@ -413,7 +417,11 @@ class PACMAN(PackageManagerBase):
 
         :return: The result of executing the command.
         """
-        args = ["-Sy", "--noconfirm"]
+        use_input = global_configs["live_output"]
+        if use_input:
+            args = ["-Sy"]
+        else:
+            args = ["-Sy", "--noconfirm"]
         console = Console()
         try:
             result = execute_pacman_command(args)
@@ -460,7 +468,11 @@ class PACMAN(PackageManagerBase):
 
         :return: The result of executing the command.
         """
-        args = ["-Syu", "--noconfirm"]
+        use_input = global_configs["live_output"]
+        if use_input:
+            args = ["-Syu"]
+        else:
+            args = ["-Syu", "--noconfirm"]
         console = Console()
         try:
             result = execute_pacman_command(args)
@@ -518,7 +530,11 @@ class PACMAN(PackageManagerBase):
             r = get_pkg_url(softs=pkg)
             if r is not None:
                 packages[i] = r
-        args = ["-S", "--noconfirm", *packages]
+        use_input = global_configs["live_output"]
+        if use_input:
+            args = ["-S", *packages]
+        else:
+            args = ["-S", "--noconfirm", *packages]
         console = Console()
         try:
             result = execute_pacman_command(args)
@@ -593,7 +609,11 @@ class PACMAN(PackageManagerBase):
         Returns:
             The result of the execute_pacman_command function.
         """
-        args = ["-Rns", "--noconfirm", *packages]
+        use_input = global_configs["live_output"]
+        if use_input:
+            args = ["-Rns", *packages]
+        else:
+            args = ["-Rns", "--noconfirm", *packages]
         console = Console()
         try:
             result = execute_pacman_command(args)

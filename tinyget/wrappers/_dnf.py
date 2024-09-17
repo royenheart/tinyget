@@ -2,7 +2,7 @@ from datetime import datetime
 import re
 import traceback
 
-from tinyget.globals import ERROR_HANDLED, ERROR_UNKNOWN
+from tinyget.globals import ERROR_HANDLED, ERROR_UNKNOWN, global_configs
 from tinyget.interact.process import CommandExecutionError
 from rich.console import Console
 from rich.panel import Panel
@@ -346,7 +346,11 @@ class DNF(PackageManagerBase):
 
         :return: The output of the command executed to update the system.
         """
-        args = ["check-update", "-y"]
+        use_input = global_configs["live_output"]
+        if use_input:
+            args = ["check-update"]
+        else:
+            args = ["check-update", "-y"]
         console = Console()
         try:
             result = execute_dnf_command(args)
@@ -379,7 +383,11 @@ class DNF(PackageManagerBase):
 
         :return: The output of the `execute_dnf_command` function.
         """
-        args = ["upgrade", "--refresh", "-y"]
+        use_input = global_configs["live_output"]
+        if use_input:
+            args = ["upgrade", "--refresh"]
+        else:
+            args = ["upgrade", "--refresh", "-y"]
         console = Console()
         try:
             result = execute_dnf_command(args)
@@ -439,7 +447,11 @@ class DNF(PackageManagerBase):
             r = get_pkg_url(softs=pkg)
             if r is not None:
                 packages[i] = r
-        args = ["install", "-y", *packages]
+        use_input = global_configs["live_output"]
+        if use_input:
+            args = ["install", *packages]
+        else:
+            args = ["install", "-y", *packages]
         console = Console()
         try:
             result = execute_dnf_command(args)
@@ -516,7 +528,11 @@ class DNF(PackageManagerBase):
         Returns:
             None
         """
-        args = ["remove", "-y", *packages]
+        use_input = global_configs["live_output"]
+        if use_input:
+            args = ["remove", *packages]
+        else:
+            args = ["remove", "-y", *packages]
         console = Console()
         try:
             result = execute_dnf_command(args)
@@ -653,7 +669,11 @@ class DNF(PackageManagerBase):
 
     def rollback(self, id: str):
         console = Console()
-        args = ["history", "undo", id, "-y"]
+        use_input = global_configs["live_output"]
+        if use_input:
+            args = ["history", "undo", id]
+        else:
+            args = ["history", "undo", id, "-y"]
         try:
             result = execute_dnf_command(args)
         except CommandExecutionError as e:

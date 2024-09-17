@@ -3,7 +3,7 @@ import re
 import traceback
 from tinyget.common_utils import logger
 from tinyget.repos.third_party import get_pkg_url, get_third_party_packages
-from tinyget.globals import ERROR_HANDLED, ERROR_UNKNOWN
+from tinyget.globals import ERROR_HANDLED, ERROR_UNKNOWN, global_configs
 from tinyget.interact.process import CommandExecutionError
 from rich.console import Console
 from rich.panel import Panel
@@ -209,7 +209,11 @@ class APT(PackageManagerBase):
 
         :return: The output of the 'apt update' command.
         """
-        args = ["update", "-y"]
+        use_input = global_configs["live_output"]
+        if use_input:
+            args = ["update"]
+        else:
+            args = ["update", "-y"]
         console = Console()
         try:
             result = execute_apt_command(args)
@@ -257,7 +261,11 @@ class APT(PackageManagerBase):
         Returns:
             The output of the 'execute_apt_command' function.
         """
-        args = ["upgrade", "-y"]
+        use_input = global_configs["live_output"]
+        if use_input:
+            args = ["upgrade"]
+        else:
+            args = ["upgrade", "-y"]
         console = Console()
         try:
             result = execute_apt_command(args)
@@ -312,7 +320,11 @@ class APT(PackageManagerBase):
             r = get_pkg_url(softs=pkg)
             if r is not None:
                 packages[i] = r
-        args = ["install", "-y", *packages]
+        use_input = global_configs["live_output"]
+        if use_input:
+            args = ["install", *packages]
+        else:
+            args = ["install", "-y", *packages]
         console = Console()
         try:
             result = execute_apt_command(args)
@@ -384,7 +396,11 @@ class APT(PackageManagerBase):
         Returns:
             None: This function does not return anything.
         """
-        args = ["remove", "-y", *packages]
+        use_input = global_configs["live_output"]
+        if use_input:
+            args = ["remove", *packages]
+        else:
+            args = ["remove", "-y", *packages]
         console = Console()
         try:
             result = execute_apt_command(args)
