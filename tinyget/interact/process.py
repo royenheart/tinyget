@@ -1,7 +1,7 @@
 import re
 import termios
 from typing import List, Optional, Union
-
+from tempfile import mktemp
 import click
 from tinyget.common_utils import logger
 from concurrent.futures import ThreadPoolExecutor
@@ -12,7 +12,7 @@ import sys
 import select
 
 # two workers: read_subprocess_output / read_input
-executor = ThreadPoolExecutor(max_workers=2)
+executor = ThreadPoolExecutor(max_workers=4)
 
 
 def non_blocking_input(proc: subprocess.Popen, fd: Optional[int] = None):
@@ -30,8 +30,18 @@ async def read_subprocess_output(master_fd: int):
         return await asyncio.get_running_loop().run_in_executor(
             executor=executor, func=lambda: os.read(master_fd, 1024).decode()
         )
-    except Exception as e:
-        pass
+    except Exception:
+        raise
+
+
+async def read_subprocess_err(errfd: int):
+    try:
+        return await asyncio.get_running_loop().run_in_executor(
+            executor=executor,
+            func=lambda: os.read(errfd, 1024).decode(),
+        )
+    except Exception:
+        raise
 
 
 async def read_input(proc: subprocess.Popen, master_fd: int):
@@ -113,23 +123,39 @@ def spawn(
     )
 
 
-async def async_execute_command(proc: subprocess.Popen, master_fd: int, slave_fd: int):
+async def async_execute_command(
+    proc: subprocess.Popen,
+    master_fd: int,
+    slave_fd: int,
+    err_read_fd: int,
+    err_write_fd: int,
+):
     output_list = []
+    err_list = []
     read_task = asyncio.create_task(read_input(proc, master_fd))
     while proc.poll() is None:
         try:
             disa = await asyncio.wait_for(read_subprocess_output(master_fd), timeout=1)
         except Exception as e:
-            continue
+            disa = None
+        try:
+            derr = await asyncio.wait_for(read_subprocess_err(err_read_fd), timeout=0.5)
+        except Exception as e:
+            derr = None
         if disa:
             output_list.append(disa)
             click.echo(disa, nl=False)
+        if derr:
+            err_list.append(derr)
+            click.echo(derr, nl=False)
 
-    pstderr = proc.stderr.read() if proc.stderr else ""
+    pstderr = "".join(err_list)
     pretcode = proc.returncode
 
     os.close(slave_fd)
     os.close(master_fd)
+    os.close(err_write_fd)
+    os.close(err_read_fd)
 
     proc.terminate()
     read_task.cancel()
@@ -168,6 +194,12 @@ def execute_command(
         # LF stands for Line Feed
         attrs[1] = attrs[1] & ~termios.ONLCR
         termios.tcsetattr(slave_fd, termios.TCSANOW, attrs)
+        stderrf_str = mktemp()
+        logger.debug(f"stderr output file: {stderrf_str}")
+        stderr_fi = open(stderrf_str, "w+")
+        stderr_fd = stderr_fi.fileno()
+        stderr_read_fi = open(stderrf_str, "r")
+        stderr_read_fd = stderr_read_fi.fileno()
         p = spawn(
             args,
             envp,
@@ -175,9 +207,10 @@ def execute_command(
             text=True,
             stdoutfd=slave_fd,
             stdinfd=slave_fd,
+            stderrfd=stderr_fd,
         )
         output_list, pstderr, pretcode = asyncio.run(
-            async_execute_command(p, master_fd, slave_fd)
+            async_execute_command(p, master_fd, slave_fd, stderr_read_fd, stderr_fd)
         )
         # use regex to delete wrong escape sequences
         # https://stackoverflow.com/questions/15011478/ansi-questions-x1b25h-and-x1be
