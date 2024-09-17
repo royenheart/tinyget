@@ -2,8 +2,7 @@
 from .wrappers import PackageManager
 from .interact import AIHelper, AIHelperHostError, AIHelperKeyError
 from .common_utils import set_configuration, setup_logger
-from .globals import global_configs
-
+from tinyget.globals import global_configs, DEFAULT_LIVE_OUTPUT
 from typing import List
 from trogon import tui
 import click
@@ -17,13 +16,25 @@ import click
     help="Path to configuration file, default is ~/.config/tinyget/config.json",
 )
 @click.option("--debug", default=False, help="Enable debug logs")
+@click.option(
+    "--live-output/--no-live-output",
+    default=DEFAULT_LIVE_OUTPUT,
+    help="Real-time stream output",
+)
 @click.option("--host", default=None, help="OpenAI host.")
 @click.option("--api-key", default=None, help="OpenAI API key.")
 @click.option("--model", default=None, help="OpenAI model.")
 @click.option("--max-tokens", default=None, help="OpenAI max tokens.")
 def cli(
-    config_path: str, debug: bool, host: str, api_key: str, model: str, max_tokens: int
+    config_path: str,
+    debug: bool,
+    live_output: bool,
+    host: str,
+    api_key: str,
+    model: str,
+    max_tokens: int,
 ):
+    global_configs["live_output"] = live_output
     global_configs["config_path"] = config_path
     global_configs["host"] = host
     global_configs["api_key"] = api_key

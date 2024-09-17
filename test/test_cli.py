@@ -3,7 +3,7 @@ import pytest
 
 
 def test_cli_help():
-    command = "tinyget --help"
+    command = "tinyget --no-live-output --help"
     p = subprocess.Popen(
         command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
@@ -13,7 +13,7 @@ def test_cli_help():
 
 
 def test_cli_search():
-    command = "tinyget search vim"
+    command = "tinyget --no-live-output search vim"
     p = subprocess.Popen(
         command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
@@ -23,7 +23,7 @@ def test_cli_search():
 
 
 def test_cli_list():
-    command = "tinyget list"
+    command = "tinyget --no-live-output list"
     p = subprocess.Popen(
         command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )

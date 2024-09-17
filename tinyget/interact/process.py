@@ -1,7 +1,52 @@
+import re
+import termios
 from typing import List, Optional, Union
+
+import click
 from tinyget.common_utils import logger
+from concurrent.futures import ThreadPoolExecutor
 import subprocess
 import os
+import asyncio
+import sys
+import select
+
+# two workers: read_subprocess_output / read_input
+executor = ThreadPoolExecutor(max_workers=2)
+
+
+def non_blocking_input(proc: subprocess.Popen, fd: Optional[int] = None):
+    while proc.poll() is None:
+        r, _, _ = select.select([sys.stdin if fd is None else fd], [], [], 0.1)
+
+        if r:
+            k = sys.stdin.readline().strip()
+            return k
+    return ""
+
+
+async def read_subprocess_output(master_fd: int):
+    try:
+        return await asyncio.get_running_loop().run_in_executor(
+            executor=executor, func=lambda: os.read(master_fd, 1024).decode()
+        )
+    except Exception as e:
+        pass
+
+
+async def read_input(proc: subprocess.Popen, master_fd: int):
+    while proc.poll() is None:
+        try:
+            user_input = await asyncio.get_event_loop().run_in_executor(
+                executor=executor,
+                func=lambda: non_blocking_input(proc=proc),
+            )
+        except Exception as e:
+            break
+        try:
+            os.write(master_fd, (user_input + "\n").encode())
+        except Exception as e:
+            break
 
 
 class CommandExecutionError(Exception):
@@ -27,7 +72,14 @@ class CommandExecutionError(Exception):
         self.stderr = stderr
 
 
-def spawn(args: Union[List[str], str], envp: dict = {}):
+def spawn(
+    args: Union[List[str], str],
+    envp: dict = {},
+    text: Optional[bool] = None,
+    stdoutfd: Optional[int] = None,
+    stderrfd: Optional[int] = None,
+    stdinfd: Optional[int] = None,
+):
     """
     Spawns a new process with the given arguments and environment variables.
 
@@ -48,18 +100,46 @@ def spawn(args: Union[List[str], str], envp: dict = {}):
         orig_envp[k] = v
     return subprocess.Popen(
         args=args,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE if stdoutfd is None else stdoutfd,
+        stderr=subprocess.PIPE if stderrfd is None else stderrfd,
+        stdin=subprocess.PIPE if stdinfd is None else stdinfd,
         close_fds=True,
         env=orig_envp,
         bufsize=0,
         shell=isinstance(args, str),
+        text=text,
     )
 
 
+async def async_execute_command(proc: subprocess.Popen, master_fd: int, slave_fd: int):
+    output_list = []
+    read_task = asyncio.create_task(read_input(proc, master_fd))
+    while proc.poll() is None:
+        try:
+            disa = await asyncio.wait_for(read_subprocess_output(master_fd), timeout=1)
+        except Exception as e:
+            continue
+        if disa:
+            output_list.append(disa)
+            click.echo(disa, nl=False)
+
+    pstderr = proc.stderr.read() if proc.stderr else ""
+    pretcode = proc.returncode
+
+    os.close(slave_fd)
+    os.close(master_fd)
+
+    proc.terminate()
+    read_task.cancel()
+
+    return (output_list, pstderr, pretcode)
+
+
 def execute_command(
-    args: Union[List[str], str], envp: dict = {}, timeout: Optional[float] = None
+    args: Union[List[str], str],
+    envp: dict = {},
+    timeout: Optional[float] = None,
+    realtime_output=False,
 ):
     """
     Execute a command and capture its stdout and stderr.
@@ -75,9 +155,35 @@ def execute_command(
     Raises:
         CommandExecutionError: If the command execution fails, an exception is raised with details about the command, environment variables, stdout, and stderr.
     """
-    p = spawn(args, envp)
-    stdout, stderr = p.communicate(input=None, timeout=timeout)
-    return stdout.decode(), stderr.decode(), p.returncode
+    if realtime_output:
+        master_fd, slave_fd = os.openpty()
+        attrs = termios.tcgetattr(slave_fd)
+        # disable auto translate breaklines (NL to CRNL or something else to match the current platform)
+        # https://stackoverflow.com/questions/1552749/difference-between-cr-lf-lf-and-cr-line-break-types
+        # NL stands for New Line, it's the abstraction of the new line character
+        # CR stands for Carriage Return
+        # LF stands for Line Feed
+        attrs[1] = attrs[1] & ~termios.ONLCR
+        termios.tcsetattr(slave_fd, termios.TCSANOW, attrs)
+        p = spawn(
+            args,
+            envp,
+            text=True,
+            stdoutfd=slave_fd,
+            stdinfd=slave_fd,
+        )
+        output_list, pstderr, pretcode = asyncio.run(
+            async_execute_command(p, master_fd, slave_fd)
+        )
+        # use regex to delete wrong escape sequences
+        # https://stackoverflow.com/questions/15011478/ansi-questions-x1b25h-and-x1be
+        output_list = [re.sub(r"\x1B\[[0-?]*[ -/]*[@-~]", "", x) for x in output_list]
+        poutput = "".join(output_list)
+        return poutput, pstderr, pretcode
+    else:
+        p = spawn(args, envp)
+        stdout, stderr = p.communicate(input=None, timeout=timeout)
+        return stdout.decode(), stderr.decode(), p.returncode
 
 
 def just_execute(args: Union[List[str], str]):

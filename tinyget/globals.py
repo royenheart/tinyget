@@ -1,8 +1,9 @@
 import os
 
 DEFAULT_LOCALE_DIR = os.path.join(os.path.dirname(__file__), "locale")
+DEFAULT_LIVE_OUTPUT = True
 
-global_configs = {"LOCALE_DIR": DEFAULT_LOCALE_DIR}
+global_configs = {"LOCALE_DIR": DEFAULT_LOCALE_DIR, "live_output": DEFAULT_LIVE_OUTPUT}
 
 # tinyget retcode
 SUCCESS = 0
