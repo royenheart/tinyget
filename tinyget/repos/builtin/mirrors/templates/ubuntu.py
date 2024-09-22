@@ -1,34 +1,36 @@
 from typing import Optional
 from tinyget.repos.third_party import (
+    AllMirrorInfo,
+    AllSystemInfo,
     ask_for_mirror_options,
     get_os_version,
     ThirdPartyMirrors,
+    judge_os_in_systemlist,
 )
 from tinyget.common_utils import logger, strip_str_lines
 
 
-support_os = [
-    ("ubuntu", "jammy"),
-    ("ubuntu", "focal"),
-    ("ubuntu", "bionic"),
-    ("ubuntu", "trusty"),
-    ("ubuntu", "xenial"),
-    ("ubuntu", "lunar"),
-    ("ubuntu", "mantic"),
-    ("ubuntu", "noble"),
-]
-
-
 class _ubuntu(ThirdPartyMirrors):
-    MIRROR_NAME = "ubuntu"
+    MIRROR_NAME = AllMirrorInfo.UBUNTU
 
     def get_template(self) -> Optional[str]:
-        os, _, os_codename = get_os_version()
-        if (os, os_codename) not in support_os:
-            logger.warning(
-                f"Couldn't find ubuntu mirror for your os {os} {os_codename}"
-            )
+        oinfo = get_os_version()
+        if not judge_os_in_systemlist(
+            oinfo,
+            [
+                AllSystemInfo.UBUNTU_JAMMY,
+                AllSystemInfo.UBUNTU_FOCAL,
+                AllSystemInfo.UBUNTU_BIONIC,
+                AllSystemInfo.UBUNTU_TRUSTY,
+                AllSystemInfo.UBUNTU_XENIAL,
+                AllSystemInfo.UBUNTU_LUNAR,
+                AllSystemInfo.UBUNTU_MANTIC,
+                AllSystemInfo.UBUNTU_NOBLE,
+            ],
+        )[0]:
+            logger.warning(f"Couldn't find ubuntu mirror for your os {oinfo}")
             return None
+        _, _, os_codename = oinfo
         VERSION = os_codename
         USE_OFFICIAL_SECURITY_UPDATES = False
         USE_PROPOSED = False
@@ -44,6 +46,14 @@ class _ubuntu(ThirdPartyMirrors):
                 ("use_official_security_updates", "Enable official security updates?"),
             ],
         )
+        for qa in w:
+            q, a = qa
+            if q == "use_proposed":
+                USE_PROPOSED = bool(a)
+            elif q == "use_source_mirror":
+                USE_SOURCE_MIRROR = bool(a)
+            elif q == "use_official_security_updates":
+                USE_OFFICIAL_SECURITY_UPDATES = bool(a)
         USE_SOURCE_MIRROR_ENABLE = "" if USE_SOURCE_MIRROR else "#"
         USE_PROPOSED_ENABLE = "" if USE_PROPOSED else "#"
         USE_OFFICIAL_SECURITY_UPDATES_ENABLE = (

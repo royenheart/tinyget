@@ -7,6 +7,7 @@ from collections import defaultdict
 import importlib
 import importlib.util
 import re
+from enum import Enum, unique
 from typing import Callable, Dict, List, Optional, Tuple
 from tinyget.package import Package
 from tinyget.globals import global_configs
@@ -14,6 +15,142 @@ from tinyget.common_utils import logger
 from rich.prompt import Prompt
 import os
 import requests
+
+ROLLING_SYSTEM = -1
+
+
+@unique
+class AllSystemInfo(tuple, Enum):
+    """All os info
+
+    Due to os release not support upper case, use upper case to identity Name. the value is (OS ID (name), OS VERSION ID, OS VERSION CODENAME)
+
+    The key is OS ID
+    """
+
+    # https://www.debian.org/releases/
+    # the sid / testing is actually based on trixie (next release's codename)
+    # so the version codename should be trixie, thus no sid / testing but trixie specified
+    # TODO: Automatically update debian's sid / testing version code name
+    # DEBIAN_SID = ("debian", None, "trixie")
+    # DEBIAN_TESTING = ("debian", None, "trixie")
+    DEBIAN_TRIXIE = ("debian", None, "trixie")
+    DEBIAN_BOOKWORM = ("debian", "12", "bookworm")
+    DEBIAN_BULLSEYE = ("debian", "11", "bullseye")
+    DEBIAN_BUSTER = ("debian", "10", "buster")
+    DEBIAN_STRETCH = ("debian", "9", "stretch")
+    DEBIAN_JESSIE = ("debian", "8", "jessie")
+    # https://releases.ubuntu.com/
+    UBUNTU_JAMMY = ("ubuntu", "22.04", "jammy")
+    UBUNTU_FOCAL = ("ubuntu", "20.04", "focal")
+    UBUNTU_BIONIC = ("ubuntu", "18.04", "bionic")
+    UBUNTU_TRUSTY = ("ubuntu", "14.04", "trusty")
+    UBUNTU_XENIAL = ("ubuntu", "16.04", "xenial")
+    UBUNTU_LUNAR = ("ubuntu", "23.04", "lunar")
+    UBUNTU_MANTIC = ("ubuntu", "23.10", "mantic")
+    UBUNTU_NOBLE = ("ubuntu", "24.04", "noble")
+    # archlinux has not VERSION CODENAME but has VERSION ID and it not stable
+    # since it's a rolling release, the VERSION ID will change
+    # we specify (-1, -1) for those rolling system
+    # just compare the ID
+    ARCH = ("arch", ROLLING_SYSTEM, ROLLING_SYSTEM)
+
+    def __eq__(self, value: object) -> bool:
+        return self.value == value
+
+    def __str__(self) -> str:
+        return self.name
+
+    def __repr__(self) -> str:
+        return self.name
+
+
+def judge_os_in_systemlist(
+    mversion: Tuple[Optional[str], Optional[str], Optional[str]],
+    syslist: List[AllSystemInfo],
+) -> Tuple[bool, Optional[AllSystemInfo]]:
+    """Jude the os info (get from get_os_version()) is in the system list (list of AllSystemInfo).
+
+    Args:
+        mversion (Tuple[Optional[str], Optional[str], Optional[str]]): Tuple of (OS ID (NAME), OS VERSION ID, OS VERSION CODENAME)
+        syslist (List[AllSystemInfo]): List of AllSystemInfo
+
+    Returns:
+        Tuple[bool, Optional[AllSystemInfo]]: return if os is in the list and the matched system
+    """
+    mysys_id, mysys_version_id, mysys_version_code = mversion
+    # OS ID must be the key, so no OS ID, no other judgements
+    if mysys_id is None:
+        return (False, None)
+    for osys in syslist:
+        # all equal
+        if osys == mversion:
+            return (True, osys)
+        sys_id, sys_version_id, sys_version_code = osys
+        # for rolling system
+        if (
+            sys_version_code == ROLLING_SYSTEM
+            and sys_version_id == ROLLING_SYSTEM
+            and sys_id == mysys_id
+        ):
+            return (True, osys)
+        # Next unmatched
+        # The key OS ID is equal and at least one of the (OS VERSION ID / OS VERSION CODENAME) is equal
+        if (sys_id == mysys_id) and (
+            (sys_version_id == mysys_version_id and sys_version_id is not None)
+            or (sys_version_code == mysys_version_code and sys_version_code is not None)
+        ):
+            return (True, osys)
+    return (False, None)
+
+
+@unique
+class AllMirrorInfo(str, Enum):
+    """All mirror info
+
+    When add a new mirror, please register its name (key) here and use it as your mirror's MIRROR_NAME
+
+    The info will use its value to compare / compute
+
+    The unique will prevent duplicate value for security
+    """
+
+    UBUNTU = "ubuntu"
+    LLVM_APT = "llvm_apt"
+    DEBIAN = "debian"
+    ARCHLINUX = "archlinux"
+
+    def __eq__(self, value: object) -> bool:
+        return self.value == value
+
+    def __str__(self) -> str:
+        return self.value
+
+    def __repr__(self) -> str:
+        return self.value
+
+
+@unique
+class AllPkgInfo(str, Enum):
+    """All managed package info
+
+    When add a new third package, please register its name (key) here and use it as your package's PKG_NAME
+
+    The info will use its value to compare / compute
+
+    The unique will prevent duplicate value for security
+    """
+
+    LINUXQQ = "linuxqq"
+
+    def __eq__(self, value: object) -> bool:
+        return self.value == value
+
+    def __str__(self) -> str:
+        return self.value
+
+    def __repr__(self) -> str:
+        return self.value
 
 
 class ThirdPartySofts:
@@ -67,23 +204,44 @@ def ask_for_mirror_options(
 def get_os_version() -> Tuple[Optional[str], Optional[str], Optional[str]]:
     """get os version
 
+    OS ID must be the key.
+
     Returns:
-        Tuple[Optional[str], Optional[str], Optional[str]]: return (OS Name, OS Version ID, OS Version Codename)
+        Tuple[Optional[str], Optional[str], Optional[str]]: return (OS ID (Name), OS Version ID, OS Version Codename)
     """
     try:
-        with open("/etc/os-release") as f:
+        # See https://www.freedesktop.org/software/systemd/man/latest/os-release.html
+        # ID: A lower-case string (no spaces or other characters outside of 0–9, a–z, ".", "_" and "-") identifying the operating system, excluding any version information.
+        # VERSION_ID: A lower-case string (mostly numeric, no spaces or other characters outside of 0–9, a–z, ".", "_" and "-") identifying the operating system version, excluding any OS name information or release code name.
+        # VERSION_CODENAME: A lower-case string (no spaces or other characters outside of 0–9, a–z, ".", "_" and "-") identifying the operating system release code name, excluding any OS name information or release version. This field is optional and may not be implemented on all systems.
+        if os.path.exists("/etc/os-release"):
+            os_file = "/etc/os-release"
+        elif os.path.exists("/usr/lib/os-release"):
+            os_file = "/usr/lib/os-release"
+        else:
+            raise FileNotFoundError
+        with open(os_file) as f:
             lines = f.readlines()
             info = {}
             for line in lines:
                 key, value = line.rstrip().split("=")
                 info[key] = value.strip('"')
 
-            name = info.get("ID", None)
+            id = info.get("ID", None)
+            if id is not None and len(id) == 0:
+                id = None
+
             version = info.get("VERSION_ID", None)
+            if version is not None and len(version) == 0:
+                version = None
+
             version_codename = info.get("VERSION_CODENAME", None)
-            return (name, version, version_codename)
+            if version_codename is not None and len(version_codename) == 0:
+                version_codename = None
+
+            return (id, version, version_codename)
     except FileNotFoundError as e:
-        logger.warning("Not found /etc/os-release, could not detect os version!")
+        logger.warning("Not found os release file, could not detect os version!")
         return (None, None, None)
     except Exception as e:
         logger.warning(f"Unexpected error: {e}. Could not detect os version!")
@@ -113,7 +271,7 @@ def import_libs(f: Callable):
         if not imported:
             repos = global_configs["repo_path"]
             # dynamically import package
-            for repo in repos:
+            for repo in repos:  # type: ignore
                 repo_name = f"tinyget@{repo.split(os.sep)[-1]}"
                 # search for third party packages
                 pkgs_path = os.path.join(repo, "packages")

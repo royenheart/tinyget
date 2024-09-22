@@ -1,29 +1,33 @@
 from typing import Optional
 from tinyget.repos.third_party import (
+    AllMirrorInfo,
+    AllSystemInfo,
     ThirdPartyMirrors,
     ask_for_mirror_options,
     get_os_version,
+    judge_os_in_systemlist,
 )
 from tinyget.common_utils import logger, strip_str_lines
 
 
-support_os_codenames = [
-    ("debian", "bookworm"),
-    ("debian", "bullseye"),
-    ("ubuntu", "jammy"),
-    ("ubuntu", "focal"),
-    ("ubuntu", "bionic"),
-]
-
-
 class _llvm(ThirdPartyMirrors):
-    MIRROR_NAME = "llvm_apt"
+    MIRROR_NAME = AllMirrorInfo.LLVM_APT
 
     def get_template(self) -> Optional[str]:
-        os, _, os_codename = get_os_version()
-        if (os, os_codename) not in support_os_codenames:
-            logger.warning(f"LLVM APT does not support os {os} {os_codename}")
+        oinfo = get_os_version()
+        if not judge_os_in_systemlist(
+            oinfo,
+            [
+                AllSystemInfo.DEBIAN_BOOKWORM,
+                AllSystemInfo.DEBIAN_BULLSEYE,
+                AllSystemInfo.UBUNTU_JAMMY,
+                AllSystemInfo.UBUNTU_FOCAL,
+                AllSystemInfo.UBUNTU_BIONIC,
+            ],
+        )[0]:
+            logger.warning(f"LLVM APT does not support os {oinfo}")
             return None
+        _, _, os_codename = oinfo
         OS_VERSION = os_codename
         w = ask_for_mirror_options(
             options={

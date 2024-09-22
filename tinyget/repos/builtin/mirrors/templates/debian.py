@@ -1,30 +1,60 @@
 from typing import Optional
 from tinyget.repos.third_party import (
+    AllMirrorInfo,
+    AllSystemInfo,
     ThirdPartyMirrors,
     get_os_version,
     ask_for_mirror_options,
+    judge_os_in_systemlist,
 )
 from tinyget.common_utils import logger, strip_str_lines
-
-support_os = [
-    ("debian", "sid"),
-    ("debian", "testing"),
-    ("debian", "bookworm"),
-    ("debian", "bullseye"),
-]
+import os
 
 
 class _debian(ThirdPartyMirrors):
-    MIRROR_NAME = "debian"
+    MIRROR_NAME = AllMirrorInfo.DEBIAN
 
     def get_template(self) -> Optional[str]:
-        os, _, os_codename = get_os_version()
-        if (os, os_codename) not in support_os:
-            logger.warning(
-                f"Couldn't find debian mirror for your os {os} {os_codename}"
-            )
+        oinfo = get_os_version()
+        is_support, match_os = judge_os_in_systemlist(
+            oinfo,
+            [
+                AllSystemInfo.DEBIAN_TRIXIE,
+                AllSystemInfo.DEBIAN_BOOKWORM,
+                AllSystemInfo.DEBIAN_BULLSEYE,
+            ],
+        )
+        if not is_support:
+            logger.warning(f"Couldn't find debian mirror for your os {oinfo}")
             return None
-        VERSION = os_codename
+        _, _, os_codename = oinfo
+        if match_os == AllSystemInfo.DEBIAN_TRIXIE:
+            # unrelease version in debian, switch to sid / testing depends on existing file
+            try:
+                if os.path.exists("/etc/apt/sources.list.d/debian.sources"):
+                    source_f = "/etc/apt/sources.list.d/debian.sources"
+                elif os.path.exists("/etc/apt/sources.list"):
+                    source_f = "/etc/apt/sources.list"
+                else:
+                    raise FileNotFoundError
+                with open(source_f, "r") as f:
+                    s = f.read()
+                    if "Suites: testing" in s:
+                        VERSION = "testing"
+                    elif "Suites: sid" in s:
+                        VERSION = "sid"
+                    else:
+                        logger.warning(
+                            "Could not detect debian is sid or testing! Script can't generate!"
+                        )
+                        return None
+            except FileNotFoundError as e:
+                logger.warning(
+                    "Not found existing source file for debian to judge whether it's sid / testing, script can't generate!"
+                )
+                return None
+        else:
+            VERSION = os_codename
         USE_TRADITIONAL_FORMAT = False
         USE_OFFICIAL_SECURITY_UPDATES = False
         USE_SOURCE_MIRROR = False

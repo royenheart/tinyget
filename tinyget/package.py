@@ -1,11 +1,12 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List, Optional
-from enum import Enum
+from enum import Enum, unique
 from rich.table import Table
 from rich.console import Console
 
 
+@unique
 class ManagerType(Enum):
     apt = "deb"
     dnf = "rpm"

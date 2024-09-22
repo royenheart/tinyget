@@ -1,15 +1,21 @@
 from typing import Optional
-from tinyget.repos.third_party import ThirdPartyMirrors, get_os_version
+from tinyget.repos.third_party import (
+    AllMirrorInfo,
+    ThirdPartyMirrors,
+    get_os_version,
+    judge_os_in_systemlist,
+    AllSystemInfo,
+)
 from tinyget.common_utils import logger
 
 
 class _archlinux(ThirdPartyMirrors):
-    MIRROR_NAME = "archlinux"
+    MIRROR_NAME = AllMirrorInfo.ARCHLINUX
 
     def get_template(self) -> Optional[str]:
-        os, _, _ = get_os_version()
-        if os != "arch":
-            logger.warning(f"Your os {os} is not ArchLinux!")
+        os_ver = get_os_version()
+        if not judge_os_in_systemlist(os_ver, [AllSystemInfo.ARCH])[0]:
+            logger.warning(f"Your os {os_ver} is not ArchLinux!")
             return None
         TEMPLATE = """#!/bin/bash
 # Script contents are from https://mirrors.help/

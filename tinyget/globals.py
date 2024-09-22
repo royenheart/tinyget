@@ -1,5 +1,5 @@
 import os
-from enum import Enum
+from enum import Enum, unique
 from typing import Dict, List, Union
 from tinyget.repos import BUILTIN_REPO
 import platform
@@ -14,6 +14,7 @@ global_configs: Dict[str, Union[str, List[str], bool]] = {
 }
 
 
+@unique
 class SupportArchs(Enum):
     x86_64 = "x86_64"
     mips = "mips"

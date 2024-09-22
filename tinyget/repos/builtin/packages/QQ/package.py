@@ -1,6 +1,6 @@
 from typing import List, Optional
 from tinyget.package import ManagerType, Package
-from tinyget.repos.third_party import ThirdPartySofts, download_file
+from tinyget.repos.third_party import ThirdPartySofts, download_file, AllPkgInfo
 from tinyget.wrappers import MANAGER
 from tinyget.globals import ARCH, SupportArchs
 from tinyget.wrappers import PackageManager
@@ -14,7 +14,7 @@ class _QQ(ThirdPartySofts):
     HOMEPAGE = "https://im.qq.com/linuxqq/"
     VERSION = "3.2.12_26909"
     DOWNLOAD_PAGE = "https://dldir1.qq.com/qqfile/qq/QQNT/2b82dc28/"
-    PKG_NAME = "linuxqq"
+    PKG_NAME = AllPkgInfo.LINUXQQ
 
     @property
     def is_support(self) -> bool:
