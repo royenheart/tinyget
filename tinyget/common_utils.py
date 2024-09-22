@@ -282,12 +282,3 @@ def get_configuration_with_environ(
 def strip_str_lines(orig: str) -> str:
     origs = orig.split("\n")
     return "\n".join([x.strip() for x in origs])
-
-
-if __name__ == "__main__":
-    # set_configuration(conf={"host": "https://api.openai.com", "okok": "okok"}, path="/home/kjdy/omg/test/test.json")
-    result = get_configuration(
-        path="/home/kjdy/omg/test/test.json", key=["host", "okok"]
-    )
-    setup_logger(True)
-    logger.debug(result)

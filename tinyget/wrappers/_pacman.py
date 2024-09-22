@@ -847,10 +847,3 @@ class PACMAN(PackageManagerBase):
 
     def rollback(self, id: str):
         raise NotImplementedError
-
-
-if __name__ == "__main__":
-    pacman = PACMAN()
-    stdout, stderr, retcode = pacman.install(["wget"])
-    logger.debug(stdout)
-    logger.debug(stderr)

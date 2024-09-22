@@ -255,7 +255,3 @@ def execute_command(
 def just_execute(args: Union[List[str], str]):
     command_str = args if isinstance(args, str) else " ".join(args)
     os.system(command_str)
-
-
-if __name__ == "__main__":
-    execute_command("apt install ojbk")

@@ -697,8 +697,3 @@ class DNF(PackageManagerBase):
             logger.debug(f"{traceback.format_exc()}")
             return (None, None, ERROR_UNKNOWN)
         return result
-
-
-if __name__ == "__main__":
-    dnf = DNF()
-    stdout, stderr, retcode = dnf.install(["wget"])

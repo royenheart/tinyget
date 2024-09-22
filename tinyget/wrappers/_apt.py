@@ -537,25 +537,3 @@ class APT(PackageManagerBase):
 
     def rollback(self, id: str):
         raise NotImplementedError
-
-
-if __name__ == "__main__":
-    apt = APT()
-    apt.search("vim", enable_third_party=False)
-
-    # upgradable = 0
-    # installed = 0
-    # auto = 0
-    # total = 0
-    # for package in packages:
-    #     total += 1
-    #     if package.installed:
-    #         installed += 1
-    #     if package.automatically_installed:
-    #         auto += 1
-    #     if package.upgradable:
-    #         upgradable += 1
-
-    # print(
-    #     f"total: {total}, installed: {installed}, auto: {auto}, upgradable: {upgradable}"
-    # )
