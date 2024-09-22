@@ -52,7 +52,15 @@ class CheckMetadataHook(MetadataHookInterface):
         except Exception as e:
             print(f"{e}")
 
-        common_deps = ["requests", "click", "dataclasses", "rich", "trogon"]
+        common_deps = [
+            "requests",
+            "click",
+            "dataclasses",
+            "rich",
+            "trogon",
+            "grpcio",
+            "grpcio_tools",
+        ]
         simulate_managers = {
             "apt": "tinyget.wrappers:sim_apt",
             "dnf": "tinyget.wrappers:sim_dnf",

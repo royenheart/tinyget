@@ -45,5 +45,7 @@ exclude = '''
 # in the root of the project.
 (
   ^__about__.py     # exclude a file named foo.py in the root of the project
+  | .*_pb2.py       # exclude all grpc files
+  | .*_pb2_grpc.py  # exclude all grpc files
 )
 '''

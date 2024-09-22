@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from tinyget.gui.tinyget_server import TinygetServer
+from tinyget.interact.process import run_event_loop_in_thread
 from .wrappers import PackageManager
 from .interact import AIHelper, AIHelperHostError, AIHelperKeyError
 from .common_utils import (
@@ -6,6 +8,7 @@ from .common_utils import (
     get_configuration,
     set_configuration,
     setup_logger,
+    logger,
 )
 from tinyget.globals import global_configs, DEFAULT_LIVE_OUTPUT
 from typing import List
@@ -13,7 +16,7 @@ from trogon import tui
 import click
 
 
-@tui(command="ui", help="TinyGet UI")
+@tui(help="TinyGet Simple TUI")
 @click.group()
 @click.option(
     "--config-path",
@@ -55,6 +58,17 @@ def cli(
     if max_tokens is not None:
         global_configs["max_tokens"] = str(max_tokens)
     setup_logger(debug=debug)
+
+
+@cli.command("server", help="TinyGet Server for GUI")
+@click.option("--host", default="[::]", help="Set tinyget server host bindings.")
+@click.option("--port", default=5051, help="Set tinyget server port.")
+def server(host: str, port: int):
+    logger.debug(f"Tinyget Server open in {host}:{port}")
+    global_configs["live_output"] = False
+    server = TinygetServer(port=port, address=host)
+    # start Tinyget Server
+    run_event_loop_in_thread(server.serve)
 
 
 @cli.command("list", help="List packages.")

@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package tinyget_grpc;
+
+service TinygetGRPC {
+    rpc SoftsGet(SoftsResquest) returns (SoftsResp);
+    rpc SoftsGetStream(SoftsResquest) returns (stream Package);
+    rpc SoftsGetBidiStream(stream SoftsResquest) returns (stream Package);
+    rpc SoftsInstall(SoftsInstallRequests) returns (SoftsInstallResp);
+    rpc SoftsInstallStream(SoftsInstallRequests) returns (stream SoftsInstallResp);
+    rpc SoftsInstallBidiStream(stream SoftsInstallRequests) returns (stream SoftsInstallResp);
+    rpc SoftsUninstall(SoftsUninstallRequests) returns (SoftsUninstallResp);
+    rpc SoftsUninstallStream(SoftsUninstallRequests) returns (stream SoftsUninstallResp);
+    rpc SoftsUninstallBidiStream(stream SoftsUninstallRequests) returns (stream SoftsUninstallResp);
+    rpc SysUpdate(SysUpdateRequest) returns (SysUpdateResp);
+    rpc SysUpdateStream(SysUpdateRequest) returns (stream SysUpdateResp);
+    rpc SysUpdateBidiStream(stream SysUpdateRequest) returns (stream SysUpdateResp);
+    rpc SysHistory(SysHistoryRequest) returns (SysHistoryResp);
+    rpc SysHistoryStream(SysHistoryRequest) returns (stream History);
+    rpc SysHistoryBidiStream(stream SysHistoryRequest) returns (stream History);
+}
+
+message SoftsResquest {
+    optional string pkgs = 1;
+    bool only_installed = 2;
+    bool only_upgradable = 3;
+}
+
+message SoftsInstallRequests {
+    repeated string pkgs = 1;
+}
+
+message SoftsUninstallRequests {
+    repeated string pkgs = 1;
+}
+
+message SysUpdateRequest {
+    bool upgrade = 1;
+}
+
+message SysHistoryRequest {}
+
+message Package {
+    string package_name = 1;
+    string architecture = 2;
+    string description = 3;
+    string version = 4;
+    bool installed = 5;
+    bool automatically_installed = 6;
+    bool upgradable = 7;
+    optional string available_version = 8;
+    repeated string repo = 9;
+}
+
+message History {
+    string id = 1;
+    string command = 2;
+    string date = 3;
+    repeated string operations = 4;
+}
+
+message SoftsResp {
+    repeated Package softs = 1;
+}
+
+message SysHistoryResp {
+    repeated History histories = 1;
+}
+
+message SoftsInstallResp {
+    uint32 retcode = 1;
+    optional string stdout = 2;
+    optional string stderr = 3;
+}
+
+message SoftsUninstallResp {
+    uint32 retcode = 1;
+    optional string stdout = 2;
+    optional string stderr = 3;
+}
+
+message SysUpdateResp {
+    uint32 retcode = 1;
+    optional string stdout = 2;
+    optional string stderr = 3;
+}

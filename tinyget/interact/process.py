@@ -1,6 +1,7 @@
 import re
 import termios
-from typing import List, Optional, Union
+import threading
+from typing import Callable, List, Optional, Union
 from tempfile import mktemp
 import click
 from tinyget.common_utils import logger
@@ -129,6 +130,7 @@ async def async_execute_command(
     slave_fd: int,
     err_read_fd: int,
     err_write_fd: int,
+    ret_values: List,
 ):
     output_list = []
     err_list = []
@@ -160,7 +162,24 @@ async def async_execute_command(
     proc.terminate()
     read_task.cancel()
 
-    return (output_list, pstderr, pretcode)
+    ret_values.append(output_list)
+    ret_values.append(pstderr)
+    ret_values.append(pretcode)
+
+
+def run_event_loop_in_thread(fn: Callable, *args, **kwargs):
+    def thread_target(fn: Callable, *args, **kwargs):
+        # Create new event loop in new thread
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+        # Run task in thread
+        loop.run_until_complete(fn(*args, **kwargs))
+        loop.close()
+
+    thread = threading.Thread(target=thread_target, args=(fn, *args), kwargs=kwargs)
+    thread.start()
+    thread.join()
 
 
 def execute_command(
@@ -209,9 +228,19 @@ def execute_command(
             stdinfd=slave_fd,
             stderrfd=stderr_fd,
         )
-        output_list, pstderr, pretcode = asyncio.run(
-            async_execute_command(p, master_fd, slave_fd, stderr_read_fd, stderr_fd)
+        ret_values = []
+        run_event_loop_in_thread(
+            async_execute_command,
+            p,
+            master_fd,
+            slave_fd,
+            stderr_read_fd,
+            stderr_fd,
+            ret_values,
         )
+        output_list = ret_values[0]
+        pstderr = ret_values[1]
+        pretcode = ret_values[2]
         # use regex to delete wrong escape sequences
         # https://stackoverflow.com/questions/15011478/ansi-questions-x1b25h-and-x1be
         output_list = [re.sub(r"\x1B\[[0-?]*[ -/]*[@-~]", "", x) for x in output_list]
