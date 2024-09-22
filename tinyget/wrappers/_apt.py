@@ -3,7 +3,7 @@ import re
 import traceback
 from tinyget.common_utils import logger
 from tinyget.repos.third_party import get_pkg_url, get_third_party_packages
-from tinyget.globals import ERROR_HANDLED, ERROR_UNKNOWN, global_configs
+from tinyget.globals import ERROR_HANDLED, ERROR_UNKNOWN, SUCCESS, global_configs
 from tinyget.interact.process import CommandExecutionError
 from rich.console import Console
 from rich.panel import Panel
@@ -36,7 +36,7 @@ def execute_apt_command(args: List[str], timeout: Optional[float] = None):
     out, err, retcode = _execute_command(args, envp, timeout)
     if retcode == 0:
         # Operation successful
-        return (out, err, retcode)
+        return (out, err, SUCCESS)
     else:
         raise CommandExecutionError(
             # 0: args the operation. 1: envp the execution environment

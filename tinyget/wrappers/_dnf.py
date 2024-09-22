@@ -2,7 +2,7 @@ from datetime import datetime
 import re
 import traceback
 
-from tinyget.globals import ERROR_HANDLED, ERROR_UNKNOWN, global_configs
+from tinyget.globals import ERROR_HANDLED, ERROR_UNKNOWN, SUCCESS, global_configs
 from tinyget.interact.process import CommandExecutionError
 from rich.console import Console
 from rich.panel import Panel
@@ -39,7 +39,7 @@ def execute_dnf_command(args: List[str], timeout: Optional[float] = None):
     # see 'man dnf'
     if retcode == 0:
         # Operation successful
-        return (out, err, retcode)
+        return (out, err, SUCCESS)
     elif retcode == 1:
         raise CommandExecutionError(
             message=_(
@@ -64,7 +64,7 @@ def execute_dnf_command(args: List[str], timeout: Optional[float] = None):
         )
     elif retcode == 100:
         # there are updates available and a list of updates are printed
-        return (out, err, retcode)
+        return (out, err, SUCCESS)
     elif retcode == 200:
         raise CommandExecutionError(
             message=_(
