@@ -104,27 +104,31 @@ def list_packages(installed: bool, upgradable: bool, count: bool):
 @cli.command(help="Update the index of available packages.")
 def update():
     package_manager = PackageManager()
-    package_manager.update()
+    out, err, retcode = package_manager.update()
+    exit(retcode)
 
 
 @cli.command(help="Upgrade all available packages.")
 def upgrade():
     package_manager = PackageManager()
-    package_manager.upgrade()
+    out, err, retcode = package_manager.upgrade()
+    exit(retcode)
 
 
 @cli.command(help="Install packages.")
 @click.argument("package_names", nargs=-1, required=True)
 def install(package_names: List[str]):
     package_manager = PackageManager()
-    package_manager.install(package_names)
+    out, err, retcode = package_manager.install(package_names)
+    exit(retcode)
 
 
 @cli.command(help="Uninstall packages.")
 @click.argument("package_names", nargs=-1, required=True)
 def uninstall(package_names: List[str]):
     package_manager = PackageManager()
-    package_manager.uninstall(package_names)
+    out, err, retcode = package_manager.uninstall(package_names)
+    exit(retcode)
 
 
 @cli.command(help="Search package. Packages can be regex")
@@ -154,7 +158,8 @@ def history():
 @click.argument("id", nargs=1, required=True)
 def rollback(id: str):
     package_manager = PackageManager()
-    package_manager.rollback(id=id)
+    out, err, retcode = package_manager.rollback(id=id)
+    exit(retcode)
 
 
 @cli.command("repo_configure", help="configure repo. Will use builtin mirror list")
