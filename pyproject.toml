@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "tinyget"
 dynamic = ["version", "dependencies", "scripts"]
-requires-python = ">=3.6"
+requires-python = ">=3.8"
 authors = [
     { name = "kongjiadongyuan", email = "zhaggbl@outlook.com" },
     { name = "royenheart", email = "royenheart@outlook.com" },
