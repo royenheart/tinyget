@@ -1,6 +1,8 @@
-> Corrector: [TinyCorrect](https://gitee.com/tinylab/tinycorrect) v0.2-rc2 - [spaces toc urls autocorrect]<br/>
+> Corrector: [TinyCorrect](https://gitee.com/tinylab/tinycorrect) v0.2-rc2 - [tables]<br/>
 
 # Tinyget GUI 开发路线
+
+## 实现情况
 
 - [项目仓库][004]
 
@@ -21,16 +23,39 @@
 
 主要功能均已完成，仍需要一些额外的性能优化和用户交互的细微调整。
 
-## 调研
+## 关于主流 Linux 发行版图形软件包管理工具的调研
 
-在包管理器图形 GUI 上有一些类似软件：
+- [参考链接][020]
 
-1. [KDE Discover][001]，KDE 软件商店，基于 Qt 开发（C/C++），在 KDE 桌面环境中使用。
+在包管理器图形 GUI 上有一些类似软件，并有一定的知名度：
+
+1. [KDE Discover][001]，KDE 软件商店，基于 Qt 开发（C/C++），主要在 KDE 桌面环境中使用。支持基本所有类型的软件包（deb / rpm / Flatpak 等），
 2. Spark Store，星火应用商店，基于 Qt 开发。针对 Debian 系发行版的应用商店。
+3. [Pamac][022]，由 Manjaro Linux 团队开发，支持 AUR、Snap 和 Flatpak 的 `appstream:///` 协议。
+4. [Octopi][021]，基于 Qt 构建，支持 AUR 包，轻量级。
+5. [Gnome Software][018]，是 Ubuntu、Fedora 等诸多发行版在 Gnome 桌面下的默认软件管理器，基于 GTK4，支持基本所有类型的包。系统资源占用较大，但是功能强大。
 
-但这些软件也只有 GUI 界面提供，并没有类似 tinyget 这样封装了多种包管理器且同时提供了 CLI 的软件。
+| 特性                 | KDE Discover                      | Spark Store                       | Pamac                            | Octopi                        | Gnome Software                      |
+|--------------------|-----------------------------------|-----------------------------------|----------------------------------|-------------------------------|-------------------------------------|
+| **桌面环境**         | KDE Plasma                        | 多种桌面环境，针对 Debian 系发行版 | Manjaro、基于 Arch Linux 的发行版 | KDE、基于 Qt 的桌面环境        | Gnome                               |
+| **技术栈**           | Qt（C/C++）                         | Qt                                | GTK、Qt 两个版本                  | Qt                            | GTK4                                |
+| **支持的包管理格式** | DEB、RPM、Flatpak、Snap、AppImage 等  | DEB                               | 官方仓库、AUR、Snap、Flatpak        | 官方仓库、AUR                  | DEB、RPM、Flatpak、Snap                |
+| **底层包管理器**     | PackageKit，支持多种系统包管理器   |                                   | Pacman（Libalpm）                  | Pacman                        | PackageKit，支持多种系统包管理器     |
+| **应用元数据**       | AppStream                         |                                   | AppStream                        | 通过 Pacman 或 AUR 获取元数据 | AppStream                           |
+| **插件/扩展支持**    | 插件架构支持多种软件源和包格式    | 无插件机制                        | 支持 AUR、Snap、Flatpak 扩展       | 插件支持 AUR                  | 默认集成 Flatpak，支持其他扩展       |
+| **资源占用**         | 中等                              | 低                                | 中等                             | 低                            | 较高                                |
+| **界面设计**         | 界面友好，深度集成 KDE Plasma      | 简洁，适合资源有限的系统           | 直观，提供丰富的自定义选项        | 轻量简洁                      | 界面美观，功能强大                   |
+| **功能侧重点**       | 支持多种包格式，功能全面，扩展性强  | 针对 Debian 系系统的高效管理      | 支持 AUR，适合高级用户            | 核心功能，轻量级，简单易用      | 完整的图形软件管理，深度集成 Flatpak |
+| **系统适配性**       | KDE 桌面环境的深度集成和一致性    | 适配 Debian 系发行版（国产发行版）  | 面向 Arch 系发行版，灵活性强      | 适配 Arch 系、KDE 桌面         | Gnome 桌面环境的默认软件管理工具    |
+| **目标用户**         | KDE 用户、需要支持多种包格式的用户 | 国产发行版用户                    | 高级用户，特别是 AUR 和 Arch 用户 | 轻量级系统用户、KDE 用户       | 功能需求较高的 Gnome 用户           |
 
-为了编写 tinyget 的图形化界面，我首先调研了几种主流的软件库：
+但这些软件只提供 GUI 界面，并没有 CLI 界面提供，同时对于国产软件或者第三方软件的支持较少（需要符合规范的）。
+
+参考 [spack][019]，由于很多国产软件或者第三方软件并不按照规范形式分发，所以我们可以提供类似 spack 的配置文件方式，让所有人都能以开源的形式配置国产软件的下载安装。
+
+## Tinyget UI 框架调研与方案选择
+
+为了编写 tinyget 的图形化界面，我首先调研了几种主流的 UI 框架：
 
 ### textualize
 
@@ -304,3 +329,8 @@ Tinyget GUI 的前端支持语言的切换，通过 `react-I18n-next` 库的支�
 [015]: https://tauri.app/
 [016]: https://textual.textualize.io/
 [017]: https://www.textualize.io/
+[018]: https://apps.gnome.org/zh-CN/Software/
+[019]: https://github.com/spack/spack
+[020]: https://linux.cn/article-15727-1.html
+[021]: https://tintaescura.com/projects/octopi/
+[022]: https://wiki.manjaro.org/index.php/Pamac
