@@ -24,6 +24,16 @@ class TinygetServer:
             only_upgradable: bool,
             pkgs: Optional[str] = None,
         ):
+            """Tinyget Service get / search softs
+
+            Args:
+                only_installed (bool): Only list installed
+                only_upgradable (bool): Only list upgradable
+                pkgs (Optional[str], optional): search packages pattern. Defaults to None.
+
+            Returns:
+                List[Package]: list of packages
+            """
             await self._lock.acquire()
             try:
                 click.echo(f"Start get softwares: {pkgs if pkgs else ''}")
@@ -48,6 +58,15 @@ class TinygetServer:
             return packages
 
         async def SoftsGet(self, request: tinygetlib.SoftsResquest, context):
+            """Tinyget Service get softs
+
+            Args:
+                request (tinygetlib.SoftsResquest): gRPC softs request
+                context: gRPC context
+
+            Returns:
+                List[tinygetlib.SoftsResp]: list of gRPC softs response
+            """
             pkgs = []
             packages = await self._get_softs(
                 request.only_installed, request.only_upgradable, request.pkgs
@@ -69,6 +88,15 @@ class TinygetServer:
             return tinygetlib.SoftsResp(softs=pkgs)
 
         async def SoftsGetStream(self, request: tinygetlib.SoftsResquest, context):
+            """Tinyget Service get softs in stream
+
+            Args:
+                request (tinygetlib.SoftsResquest): gRPC softs request
+                context: gRPC context
+
+            Returns:
+                List[tinygetlib.SoftsResp]: list of gRPC softs response
+            """
             packages = await self._get_softs(
                 request.only_installed, request.only_upgradable, request.pkgs
             )
@@ -86,6 +114,15 @@ class TinygetServer:
                 )
 
         async def SoftsInstall(self, request: tinygetlib.SoftsInstallRequests, context):
+            """Tinyget Service install softs
+
+            Args:
+                request (tinygetlib.SoftsInstallResquest): gRPC softs install request
+                context: gRPC context
+
+            Returns:
+                List[tinygetlib.SoftsInstallResp]: list of gRPC softs install response
+            """
             pkgs = []
             for pkg in request.pkgs:
                 pkgs.append(pkg)
@@ -102,6 +139,15 @@ class TinygetServer:
         async def SoftsUninstall(
             self, request: tinygetlib.SoftsUninstallRequests, context
         ):
+            """Tinyget Service uninstall softs
+
+            Args:
+                request (tinygetlib.SoftsUninstallResquest): gRPC softs uninstall request
+                context: gRPC context
+
+            Returns:
+                List[tinygetlib.SoftsUninstallResp]: list of gRPC softs uninstall response
+            """
             pkgs = []
             for pkg in request.pkgs:
                 pkgs.append(pkg)
@@ -120,6 +166,15 @@ class TinygetServer:
             )
 
         async def SysUpdate(self, request: tinygetlib.SysUpdateRequest, context):
+            """Tinyget system update
+
+            Args:
+                request (tinygetlib.SysUpdateRequest): gRPC sys update request
+                context: gRPC context
+
+            Returns:
+                List[tinygetlib.SysUpdateResp]: list of gRPC sys update response
+            """
             await self._lock.acquire()
             try:
                 if request.upgrade:
@@ -135,6 +190,15 @@ class TinygetServer:
             return tinygetlib.SysUpdateResp(retcode=retcode, stdout=out, stderr=err)
 
         async def SysHistory(self, request: tinygetlib.SysHistoryRequest, context):
+            """Tinyget system history get
+
+            Args:
+                request (tinygetlib.SysHistoryRequest): gRPC sys history request
+                context: gRPC context
+
+            Returns:
+                List[tinygetlib.SysHistoryResp]: list of gRPC sys history response
+            """
             await self._lock.acquire()
             try:
                 click.echo("Get system pkg manage histories")
@@ -157,6 +221,15 @@ class TinygetServer:
         async def SysHistoryStream(
             self, request: tinygetlib.SysHistoryRequest, context
         ):
+            """Tinyget system history get in stream
+
+            Args:
+                request (tinygetlib.SysHistoryRequest): gRPC sys history request
+                context: gRPC context
+
+            Returns:
+                List[tinygetlib.SysHistoryResp]: list of gRPC sys history response
+            """
             await self._lock.acquire()
             try:
                 click.echo("Get system pkg manage histories")
@@ -181,6 +254,7 @@ class TinygetServer:
         self._address = address
 
     async def serve(self) -> None:
+        """Start tinyget server"""
         binding = f"{self._address}:{self._port}"
         server = grpc.aio.server(futures.ThreadPoolExecutor(max_workers=3))
         tinyget_service = self.TinygetService(self)
