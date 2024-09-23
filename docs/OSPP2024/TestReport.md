@@ -1,4 +1,4 @@
-> Corrector: [TinyCorrect](https://gitee.com/tinylab/tinycorrect) v0.2-rc2 - [tables]<br/>
+> Corrector: [TinyCorrect](https://gitee.com/tinylab/tinycorrect) v0.2-rc2 - [tables urls]<br/>
 
 # 测试报告
 
@@ -12,7 +12,7 @@
 
 ## 测试结果
 
-通过 [asciinema](https://asciinema.org/) 自动执行命令并记录输出。
+通过 [asciinema][001] 自动执行命令并记录输出。
 
 ### Fedora
 
@@ -35,7 +35,7 @@ asciinema rec --overwrite -c "make" -t "Tinyget Build ${name}" tinyget-build-${n
 
 结果演示：
 
-[![asciicast](https://asciinema.org/a/677182.svg)](https://asciinema.org/a/677182)
+[![asciicast](images/677182.svg)][004]
 
 #### 基本操作测试
 
@@ -207,7 +207,7 @@ fi
 
 结果演示：
 
-[![asciicast](https://asciinema.org/a/677177.svg)](https://asciinema.org/a/677177)
+[![asciicast](images/677177.svg)][002]
 
 ### ArchLinux
 
@@ -230,7 +230,7 @@ asciinema rec --overwrite -c "make" -t "Tinyget Build ${name}" tinyget-build-${n
 
 结果演示：
 
-[![asciicast](https://asciinema.org/a/677186.svg)](https://asciinema.org/a/677186)
+[![asciicast](images/677186.svg)][007]
 
 #### 基本操作测试
 
@@ -402,7 +402,7 @@ fi
 
 结果演示：
 
-[![asciicast](https://asciinema.org/a/677184.svg)](https://asciinema.org/a/677184)
+[![asciicast](images/677184.svg)][006]
 
 ### Debian
 
@@ -425,7 +425,7 @@ asciinema rec --overwrite -c "make" -t "Tinyget Build ${name}" tinyget-build-${n
 
 结果演示：
 
-[![asciicast](https://asciinema.org/a/677181.svg)](https://asciinema.org/a/677181)
+[![asciicast](images/677181.svg)][003]
 
 #### 基本操作测试
 
@@ -597,8 +597,16 @@ fi
 
 结果演示：
 
-[![asciicast](https://asciinema.org/a/677183.svg)](https://asciinema.org/a/677183)
+[![asciicast](images/677183.svg)][005]
 
 ### 结论
 
 所有测试均通过，能在受测系统上完成打包安装，同时基本操作输出也符合预期。
+
+[001]: https://asciinema.org/
+[002]: https://asciinema.org/a/677177
+[003]: https://asciinema.org/a/677181
+[004]: https://asciinema.org/a/677182
+[005]: https://asciinema.org/a/677183
+[006]: https://asciinema.org/a/677184
+[007]: https://asciinema.org/a/677186
