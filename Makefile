@@ -4,6 +4,7 @@ NO_LINT ?= OFF
 NO_TEST ?= OFF
 
 build:
+	pip install build black flake8 hatchling pytest
 	python -m build --wheel
 
 clean:
